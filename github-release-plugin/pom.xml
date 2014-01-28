@@ -8,34 +8,24 @@
 	<name>github-release-plugin Maven Mojo</name>
 	<url>http://maven.apache.org</url>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>de.jutzig</groupId>
-				<artifactId>github-release-plugin</artifactId>
-				<version>0.0.2-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id></id>
-						<phase>install</phase>
-						<goals>
-							<goal>touch</goal>
-						</goals>
-						<inherited>false</inherited>
-						<configuration>
-							<serverId>github</serverId>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+	<scm>
+		<connection>scm:git:https://github.com/jutzig/github-release-plugin.git</connection>
+		<developerConnection>scm:git:https://github.com/jutzig/github-release-plugin.git</developerConnection>
+	</scm>
+	
+	<distributionManagement>
+		<repository>
+			<id>jabylon</id>
+			<name>jabylon</name>
+			<url>scp://web.jabylon.org:23/srv/sites/jabylon/maven</url>
+		</repository>
+	</distributionManagement>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.kohsuke</groupId>
 			<artifactId>github-api</artifactId>
-			<version>1.47</version>
+			<version>1.49</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>

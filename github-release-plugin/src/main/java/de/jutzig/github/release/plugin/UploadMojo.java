@@ -16,7 +16,9 @@ package de.jutzig.github.release.plugin;
  * limitations under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -35,15 +37,17 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+import org.kohsuke.github.GHRelease;
+import org.kohsuke.github.GHReleaseBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
 /**
  * Goal which touches a timestamp file.
  * 
- * @goal touch
+ * @goal release
  * 
- * @phase process-sources
+ * @phase deploy
  */
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
@@ -56,7 +60,37 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 * @required
 	 */
 	private String serverId;
+	
+	/**
+	 * The tag name this release is based on.
+	 * 
+	 * @parameter expression="${project.version}" 
+	 */
+	private String tag;
 
+	
+	/**
+	 * The name of the release
+	 * 
+	 * @parameter 
+	 */
+	private String releaseName;
+	
+	/**
+	 * The release description
+	 * 
+	 * @parameter expression="${project.description}"
+	 */
+	private String description;
+	
+	/**
+	 * The github id of the project. By default initialized from the project scm connection
+	 * 
+	 * @parameter expression="${project.scm.connection}"
+	 * @required
+	 */
+	private String repositoryId;
+	
 	 /**
      * The Maven settings
      *
@@ -67,27 +101,105 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
     /**
      * The Maven session
      *
-     * @parameter expression="${session}
+     * @parameter expression="${session}"
      */
     private MavenSession session;
+    
+	
+    /**
+     * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
+     *
+     * @parameter expression="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}"
+     * @required
+     */
+    private String artifact;
 
 	@Requirement
 	private PlexusContainer container;
 
+    /**
+     * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
+     *
+     * @parameter
+     * 
+     */
+	private Boolean prerelease;
+
+	private String serverPassword;
+
+	private String serverUsername;
+
 	public void execute() throws MojoExecutionException {
+		if(releaseName==null)
+			releaseName = tag;
+		if(prerelease==null)
+			prerelease = tag.endsWith("-SNAPSHOT");
+		repositoryId = computeRepositoryId(repositoryId);
 		try {
 			GitHub gitHub = createGithub(serverId);
-			GHRepository repository = gitHub.getRepository("jutzig/github-release-plugin");
-			repository.createRelease("");
+			GHRepository repository = gitHub.getRepository(repositoryId);
+			GHRelease release = findRelease(repository,releaseName);
+			if(release==null) {
+				getLog().info("Creating release "+releaseName);
+				GHReleaseBuilder builder = repository.createRelease(tag);
+				if(description!=null)
+					builder.body(description);
+				builder.prerelease(prerelease);
+				builder.name(releaseName);
+				release = builder.create();
+			}	
+			else {
+				getLog().info("Release "+releaseName+" already exists. Not creating");				
+			}
+			File asset = new File(artifact);
+//			https://uploads.github.com/repos/jutzig/jabylon-plugins/releases/164420/assets?name=test.zip
+			URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
+
+			// for some reason this doesn't work currently
+//			release.uploadAsset(asset, "application/zip");
+			
+			
+//			 curl --data-binary "@test.txt" -H "Content-Type: application/octet-stream" -X POST -u user:pass https://uploads.github.com/repos/jutzig/jabylon-plugins/releases/164394/assets?name=test.zip
+			ProcessBuilder builder = new ProcessBuilder();
+			builder.directory(asset.getParentFile());
+			builder.command("curl","--data-binary",asset.getName(),"-H","Content-Type: application/octet-stream","-X","POST","-u",serverUsername+":"+serverPassword, url.toString());
+			Process start = builder.start();
+			int result = start.waitFor();
+			if(result!=0)
+				throw new MojoExecutionException("Upload failed");
 		} catch (IOException e) {
+			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
 	
+	private GHRelease findRelease(GHRepository repository, String releaseName2) throws IOException {
+		List<GHRelease> releases = repository.getReleases();
+		for (GHRelease ghRelease : releases) {
+			if(ghRelease.getName().equals(releaseName2)) {
+				return ghRelease;
+			}
+		}
+		return null;
+	}
+
+	private String computeRepositoryId(String id) {
+		if(id.startsWith("scm:git:https://github.com/"))
+			id =  id.substring("scm:git:https://github.com/".length());
+		else if(id.startsWith("scm:git:http://github.com/"))
+			id = id.substring("scm:git:http://github.com/".length());
+		if(id.endsWith(".git"))
+			id = id.substring(0,id.length()-".git".length());
+		return id;
+	}
+
 	public GitHub createGithub(String serverId) throws MojoExecutionException, IOException {
-		String serverUsername = null;
-		String serverPassword = null;
+		serverUsername = null;
+		serverPassword = null;
 
 		Server server = getServer(settings, serverId);
 		if (server == null)
