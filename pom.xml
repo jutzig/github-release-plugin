@@ -4,7 +4,7 @@
 	<groupId>de.jutzig</groupId>
 	<artifactId>github-release-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>github-release-plugin Maven Mojo</name>
 	<url>http://maven.apache.org</url>
 
@@ -36,7 +36,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.3.2</version>
+					<version>2.4.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
