@@ -8,6 +8,8 @@
 	<name>github-release-plugin Maven Mojo</name>
 	<url>http://maven.apache.org</url>
 
+	<description>Creates github releases and uploads assets to the release</description>
+
 	<scm>
 		<connection>scm:git:https://github.com/jutzig/github-release-plugin.git</connection>
 		<developerConnection>scm:git:https://github.com/jutzig/github-release-plugin.git</developerConnection>
