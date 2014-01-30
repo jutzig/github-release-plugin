@@ -3,7 +3,7 @@
 	<groupId>de.jutzig</groupId>
 	<artifactId>github-release-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<name>github-release-plugin Maven Mojo</name>
 
 	<description>Creates github releases and uploads assets to the release</description>
@@ -12,7 +12,7 @@
 		<url>https://github.com/jutzig/github-release-plugin</url>
 		<connection>scm:git:https://github.com/jutzig/github-release-plugin.git</connection>
 		<developerConnection>scm:git:https://github.com/jutzig/github-release-plugin.git</developerConnection>
-	  <tag>HEAD</tag>
+	  <tag>github-release-plugin-1.0.1</tag>
   </scm>
 
 	<distributionManagement>
