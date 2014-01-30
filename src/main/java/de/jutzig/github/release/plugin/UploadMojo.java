@@ -162,7 +162,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 //			 curl --data-binary "@test.txt" -H "Content-Type: application/octet-stream" -X POST -u user:pass https://uploads.github.com/repos/jutzig/jabylon-plugins/releases/164394/assets?name=test.zip
 			ProcessBuilder builder = new ProcessBuilder();
 			builder.directory(asset.getParentFile());
-			builder.command("curl","--data-binary",asset.getName(),"-H","Content-Type: application/octet-stream","-X","POST","-u",serverUsername+":"+serverPassword, url.toString());
+			builder.command("curl","--data-binary","@"+asset.getName(),"-H","Content-Type: application/octet-stream","-X","POST","-u",serverUsername+":"+serverPassword, url.toString());
 			Process start = builder.start();
 			int result = start.waitFor();
 			if(result!=0)
