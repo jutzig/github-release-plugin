@@ -43,7 +43,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
 /**
- * Goal which touches a timestamp file.
+ * Goal which attaches a file to a GitHub release
  * 
  * @goal release
  * 
