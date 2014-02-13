@@ -174,6 +174,8 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			id =  id.substring("scm:git:https://github.com/".length());
 		else if(id.startsWith("scm:git:http://github.com/"))
 			id = id.substring("scm:git:http://github.com/".length());
+		else if(id.startsWith("scm:git:git@github.com:"))
+			id = id.substring("scm:git:git@github.com:".length());
 		if(id.endsWith(".git"))
 			id = id.substring(0,id.length()-".git".length());
 		return id;
