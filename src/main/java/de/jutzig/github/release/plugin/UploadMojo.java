@@ -105,7 +105,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
 	 *
-	 * @parameter expression="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}"
+	 * @parameter default="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
 	 * @required
 	 */
 	private String artifact;
