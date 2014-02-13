@@ -51,38 +51,35 @@ import org.kohsuke.github.GitHub;
  */
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
-
-	
 	/**
 	 * Server id for github access.
 	 * 
-	 * @parameter expression="github" 
+	 * @parameter expression="github"
 	 * @required
 	 */
 	private String serverId;
-	
+
 	/**
 	 * The tag name this release is based on.
 	 * 
-	 * @parameter expression="${project.version}" 
+	 * @parameter expression="${project.version}"
 	 */
 	private String tag;
 
-	
 	/**
 	 * The name of the release
 	 * 
-	 * @parameter 
+	 * @parameter
 	 */
 	private String releaseName;
-	
+
 	/**
 	 * The release description
 	 * 
 	 * @parameter expression="${project.description}"
 	 */
 	private String description;
-	
+
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
 	 * 
@@ -90,39 +87,38 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 * @required
 	 */
 	private String repositoryId;
-	
+
 	 /**
-     * The Maven settings
-     *
-     * @parameter expression="${settings}
-     */
+	 * The Maven settings
+	 *
+	 * @parameter expression="${settings}
+	 */
 	private Settings settings;
-	
-    /**
-     * The Maven session
-     *
-     * @parameter expression="${session}"
-     */
-    private MavenSession session;
-    
-	
-    /**
-     * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
-     *
-     * @parameter expression="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}"
-     * @required
-     */
-    private String artifact;
+
+	/**
+	 * The Maven session
+	 *
+	 * @parameter expression="${session}"
+	 */
+	private MavenSession session;
+
+	/**
+	 * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
+	 *
+	 * @parameter expression="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}"
+	 * @required
+	 */
+	private String artifact;
 
 	@Requirement
 	private PlexusContainer container;
 
-    /**
-     * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
-     *
-     * @parameter
-     * 
-     */
+	/**
+	 * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
+	 *
+	 * @parameter
+	 * 
+	 */
 	private Boolean prerelease;
 
 	private String serverPassword;
@@ -147,19 +143,16 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 				builder.prerelease(prerelease);
 				builder.name(releaseName);
 				release = builder.create();
-			}	
+			}
 			else {
-				getLog().info("Release "+releaseName+" already exists. Not creating");				
+				getLog().info("Release "+releaseName+" already exists. Not creating");
 			}
 			File asset = new File(artifact);
-//			https://uploads.github.com/repos/jutzig/jabylon-plugins/releases/164420/assets?name=test.zip
 			URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
 
 			// for some reason this doesn't work currently
 //			release.uploadAsset(asset, "application/zip");
-			
-			
-//			 curl --data-binary "@test.txt" -H "Content-Type: application/octet-stream" -X POST -u user:pass https://uploads.github.com/repos/jutzig/jabylon-plugins/releases/164394/assets?name=test.zip
+
 			ProcessBuilder builder = new ProcessBuilder();
 			builder.directory(asset.getParentFile());
 			builder.command("curl","--data-binary","@"+asset.getName(),"-H","Content-Type: application/octet-stream","-X","POST","-u",serverUsername+":"+serverPassword, url.toString());
@@ -176,7 +169,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		}
 
 	}
-	
+
 	private GHRelease findRelease(GHRepository repository, String releaseName2) throws IOException {
 		List<GHRelease> releases = repository.getReleases();
 		for (GHRelease ghRelease : releases) {
@@ -219,9 +212,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		serverPassword = server.getPassword();
 		GitHub gitHub = GitHub.connectUsingPassword(serverUsername, serverPassword);
 		return gitHub;
-		
 	}
-
 
 	/**
 	 * Get server with given id
@@ -246,6 +237,5 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	public void contextualize(Context context) throws ContextException {
 		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
-		
 	}
 }
