@@ -151,21 +151,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
 
 			// for some reason this doesn't work currently
-//			release.uploadAsset(asset, "application/zip");
-
-			ProcessBuilder builder = new ProcessBuilder();
-			builder.directory(asset.getParentFile());
-			builder.command("curl","--data-binary","@"+asset.getName(),"-H","Content-Type: application/octet-stream","-X","POST","-u",serverUsername+":"+serverPassword, url.toString());
-			Process start = builder.start();
-			int result = start.waitFor();
-			if(result!=0)
-				throw new MojoExecutionException("Upload failed");
+			release.uploadAsset(asset, "application/zip");
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 
 	}
