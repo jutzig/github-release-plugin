@@ -83,7 +83,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
 	 * 
-	 * @parameter default="${project.scm.connection}" expression="${release.repositoryId}"
+	 * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
 	 * @required
 	 */
 	private String repositoryId;
@@ -105,7 +105,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
 	 *
-	 * @parameter default="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
+	 * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
 	 * @required
 	 */
 	private String artifact;
