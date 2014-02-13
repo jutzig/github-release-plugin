@@ -69,7 +69,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * The name of the release
 	 * 
-	 * @parameter
+	 * @parameter expression="${release.name}"
 	 */
 	private String releaseName;
 
