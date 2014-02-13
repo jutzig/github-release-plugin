@@ -83,7 +83,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
 	 * 
-	 * @parameter expression="${project.scm.connection}"
+	 * @parameter default="${project.scm.connection}" expression="${release.repositoryId}"
 	 * @required
 	 */
 	private String repositoryId;
