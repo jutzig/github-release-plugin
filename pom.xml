@@ -12,8 +12,8 @@
 		<url>https://github.com/jutzig/github-release-plugin</url>
 		<connection>scm:git:https://github.com/jutzig/github-release-plugin.git</connection>
 		<developerConnection>scm:git:https://github.com/jutzig/github-release-plugin.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<distributionManagement>
 		<repository>
