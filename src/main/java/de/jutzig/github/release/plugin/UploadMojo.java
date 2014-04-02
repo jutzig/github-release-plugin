@@ -37,6 +37,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHReleaseBuilder;
 import org.kohsuke.github.GHRepository;
@@ -109,6 +110,13 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 * @required
 	 */
 	private String artifact;
+	
+	/**
+     * Flag to indicate to overwrite the asset in the release if it already exists. Default is false
+     *
+     * @parameter default-value=false
+     */
+    private Boolean overwriteArtifact;
 
 	@Requirement
 	private PlexusContainer container;
@@ -131,10 +139,11 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		if(prerelease==null)
 			prerelease = tag.endsWith("-SNAPSHOT");
 		repositoryId = computeRepositoryId(repositoryId);
+		GHRelease release = null;
 		try {
 			GitHub gitHub = createGithub(serverId);
 			GHRepository repository = gitHub.getRepository(repositoryId);
-			GHRelease release = findRelease(repository,releaseName);
+			release = findRelease(repository,releaseName);
 			if(release==null) {
 				getLog().info("Creating release "+releaseName);
 				GHReleaseBuilder builder = repository.createRelease(tag);
@@ -147,12 +156,27 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			else {
 				getLog().info("Release "+releaseName+" already exists. Not creating");
 			}
+		} catch (IOException e) {
+            getLog().error(e);
+            throw new MojoExecutionException("Failed to create release", e);
+        }
+		try {
 			File asset = new File(artifact);
 			URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
+			
+			List<GHAsset> existingAssets = release.getAssets();
+			for ( GHAsset a : existingAssets ){
+			    if (a.getName().equals( asset.getName() ) && overwriteArtifact){
+			        getLog().info("Deleting exisiting asset");
+			        a.delete();
+			    }
+			}
 
 			// for some reason this doesn't work currently
 			release.uploadAsset(asset, "application/zip");
+			
 		} catch (IOException e) {
+		    
 			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
 		}
