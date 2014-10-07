@@ -22,6 +22,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -129,10 +130,6 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 */
 	private Boolean prerelease;
 
-	private String serverPassword;
-
-	private String serverUsername;
-
 	public void execute() throws MojoExecutionException {
 		if(releaseName==null)
 			releaseName = tag;
@@ -206,9 +203,6 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	}
 
 	public GitHub createGithub(String serverId) throws MojoExecutionException, IOException {
-		serverUsername = null;
-		serverPassword = null;
-
 		Server server = getServer(settings, serverId);
 		if (server == null)
 			throw new MojoExecutionException(MessageFormat.format("Server ''{0}'' not found in settings", serverId));
@@ -223,10 +217,15 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			throw new MojoExecutionException("Unable to lookup SettingsDecrypter: " + cle.getMessage(), cle);
 		}
 
-		serverUsername = server.getUsername();
-		serverPassword = server.getPassword();
-		GitHub gitHub = GitHub.connectUsingPassword(serverUsername, serverPassword);
-		return gitHub;
+		String serverUsername = server.getUsername();
+		String serverPassword = server.getPassword();
+		String serverAccessToken = server.getPrivateKey();
+		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
+			return GitHub.connectUsingPassword(serverUsername, serverPassword);
+		else if (StringUtils.isNotEmpty(serverAccessToken))
+			return GitHub.connectUsingOAuth(serverAccessToken);
+		else
+			throw new MojoExecutionException("Configuration for server " + serverId + " has no login credentials");
 	}
 
 	/**
