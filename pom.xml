@@ -3,7 +3,7 @@
 	<groupId>de.jutzig</groupId>
 	<artifactId>github-release-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<version>1.1.0</version>
+	<version>1.1.1-SNAPSHOT</version>
 	<name>github-release-plugin</name>
 	<description>Maven plugin to create github releases and upload assets to the release</description>
 	<url>https://github.com/jutzig/github-release-plugin</url>
@@ -28,7 +28,7 @@
 		<url>https://github.com/jutzig/github-release-plugin</url>
 		<connection>scm:git:https://github.com/jutzig/github-release-plugin.git</connection>
 		<developerConnection>scm:git:https://github.com/jutzig/github-release-plugin.git</developerConnection>
-	  <tag>github-release-plugin-1.1.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<distributionManagement>
