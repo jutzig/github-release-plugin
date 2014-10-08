@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.jutzig</groupId>
 	<artifactId>github-release-plugin</artifactId>
@@ -28,8 +29,8 @@
 		<url>https://github.com/jutzig/github-release-plugin</url>
 		<connection>scm:git:https://github.com/jutzig/github-release-plugin.git</connection>
 		<developerConnection>scm:git:https://github.com/jutzig/github-release-plugin.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<distributionManagement>
 		<snapshotRepository>
@@ -124,6 +125,26 @@
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>de.jutzig</groupId>
+						<artifactId>github-release-plugin</artifactId>
+						<version>1.1.0</version>
+						<executions>
+							<execution>
+								<id>github-upload</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>release</goal>
+								</goals>
+								<inherited>false</inherited>
+								<configuration>
+									<releaseName>v${project.version}</releaseName>
+									<tag>v${project.version}</tag>
+									<artifact>${project.build.directory}/${project.artifactId}-${project.version}.jar</artifact>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
