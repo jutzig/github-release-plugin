@@ -30,3 +30,5 @@ By default, the plugin will look for your github credentials in your maven `sett
   </server>
 </servers>
 ```
+
+Thanks to a contribution from rowanseymour you can also use your API token by adding it as `<privateKey>` to your server definition in the `settings.xml`.
