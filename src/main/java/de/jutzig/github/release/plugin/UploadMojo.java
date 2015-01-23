@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.FileSet;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.settings.Server;
@@ -40,6 +41,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+import org.codehaus.plexus.util.FileUtils;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHReleaseBuilder;
@@ -110,11 +112,24 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
 	 *
 	 * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
-	 * @required
 	 */
 	private String artifact;
-	
+
 	/**
+	 * A specific <code>fileSet</code> rule to select files and directories for upload to the release.
+	 *
+	 * @parameter
+	 */
+	private FileSet fileSet;
+
+	/**
+	 * A list of <code>fileSet</code> rules to select files and directories for upload to the release.
+	 *
+	 * @parameter
+	 */
+	private List<FileSet> fileSets;
+
+    /**
      * Flag to indicate to overwrite the asset in the release if it already exists. Default is false
      *
      * @parameter default-value=false
@@ -160,26 +175,52 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
             throw new MojoExecutionException("Failed to create release", e);
         }
 		try {
-			File asset = new File(artifact);
-			URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
-			
-			List<GHAsset> existingAssets = release.getAssets();
-			for ( GHAsset a : existingAssets ){
-			    if (a.getName().equals( asset.getName() ) && overwriteArtifact){
-			        getLog().info("Deleting exisiting asset");
-			        a.delete();
-			    }
+			if(artifact != null && !artifact.trim().isEmpty()) {
+				File asset = new File(artifact);
+				if(asset.exists())
+					uploadAsset(release, asset);
 			}
 
-			// for some reason this doesn't work currently
-			release.uploadAsset(asset, "application/zip");
-			
+			if(fileSet != null)
+				uploadAssets(release, fileSet);
+
+			if(fileSets != null)
+				for (FileSet set : fileSets)
+					uploadAssets(release, set);
+
 		} catch (IOException e) {
 		    
 			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
 		}
 
+	}
+
+	private void uploadAsset(GHRelease release, File asset) throws IOException {
+		getLog().info("Processing asset "+asset.getPath());
+		URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
+
+		List<GHAsset> existingAssets = release.getAssets();
+		for ( GHAsset a : existingAssets ){
+			if (a.getName().equals( asset.getName() ) && overwriteArtifact){
+				getLog().info("  Deleting existing asset");
+				a.delete();
+			}
+		}
+
+		getLog().info("  Upload asset");
+		// for some reason this doesn't work currently
+		release.uploadAsset(asset, "application/zip");
+	}
+
+	private void uploadAssets(GHRelease release, FileSet fileset) throws IOException {
+		List<File> assets = FileUtils.getFiles(
+				new File(fileset.getDirectory()),
+				StringUtils.join(fileset.getIncludes(), ','),
+				StringUtils.join(fileset.getExcludes(), ',')
+		);
+		for (File asset : assets)
+			uploadAsset(release, asset);
 	}
 
 	private GHRelease findRelease(GHRepository repository, String releaseName2) throws IOException {
