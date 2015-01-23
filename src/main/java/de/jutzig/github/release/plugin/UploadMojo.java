@@ -190,7 +190,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		return null;
 	}
 
-	private String computeRepositoryId(String id) {
+	public static String computeRepositoryId(String id) {
 		if(id.startsWith("scm:git:https://github.com/"))
 			id =  id.substring("scm:git:https://github.com/".length());
 		else if(id.startsWith("scm:git:http://github.com/"))
