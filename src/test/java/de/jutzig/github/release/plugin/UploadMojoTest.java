@@ -15,10 +15,18 @@ public class UploadMojoTest {
 	@Before
 	public void setUp() throws Exception {
 		computeRepositoryIdData = new HashMap<String, String>();
+
 		computeRepositoryIdData.put("scm:git:https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("scm:git|https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+
 		computeRepositoryIdData.put("scm:git:http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("scm:git|http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+
 		computeRepositoryIdData.put("scm:git:git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("scm:git|git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+
 		computeRepositoryIdData.put("scm:git:https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("scm:git|https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
 	}
 
 	@Test

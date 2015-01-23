@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.execution.MavenSession;
@@ -190,16 +192,23 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		return null;
 	}
 
+	/**
+	 * @see <a href="https://maven.apache.org/scm/scm-url-format.html">SCM URL Format</a>
+	 */
+	private static final Pattern REPOSITORY_PATTERN = Pattern.compile(
+			"^(scm:git[:|])" +								//Maven prefix for git SCM
+			"(https?://github\\.com/|git@github\\.com:)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
+			"([^/]+/[^/]*?)" +								//Repository ID
+			"(\\.git)?$"									//Optional suffix ".git"
+	, Pattern.CASE_INSENSITIVE);
+
 	public static String computeRepositoryId(String id) {
-		if(id.startsWith("scm:git:https://github.com/"))
-			id =  id.substring("scm:git:https://github.com/".length());
-		else if(id.startsWith("scm:git:http://github.com/"))
-			id = id.substring("scm:git:http://github.com/".length());
-		else if(id.startsWith("scm:git:git@github.com:"))
-			id = id.substring("scm:git:git@github.com:".length());
-		if(id.endsWith(".git"))
-			id = id.substring(0,id.length()-".git".length());
-		return id;
+		Matcher matcher = REPOSITORY_PATTERN.matcher(id);
+		if (matcher.matches()) {
+			return matcher.group(3);
+		} else {
+			return id;
+		}
 	}
 
 	public GitHub createGithub(String serverId) throws MojoExecutionException, IOException {
