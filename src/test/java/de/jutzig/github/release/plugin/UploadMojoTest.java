@@ -18,15 +18,19 @@ public class UploadMojoTest {
 
 		computeRepositoryIdData.put("scm:git:https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
 		computeRepositoryIdData.put("scm:git|https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
 
 		computeRepositoryIdData.put("scm:git:http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
 		computeRepositoryIdData.put("scm:git|http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
 
 		computeRepositoryIdData.put("scm:git:git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
 		computeRepositoryIdData.put("scm:git|git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
 
 		computeRepositoryIdData.put("scm:git:https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
 		computeRepositoryIdData.put("scm:git|https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
+		computeRepositoryIdData.put("https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
 	}
 
 	@Test
