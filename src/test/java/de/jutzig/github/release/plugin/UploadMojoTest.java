@@ -31,7 +31,11 @@ public class UploadMojoTest {
 		computeRepositoryIdData.put("scm:git:https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
 		computeRepositoryIdData.put("scm:git|https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
 		computeRepositoryIdData.put("https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
-	}
+
+        computeRepositoryIdData.put("scm:git:git@github.com:jutzig/github-release-plugin.git/module-one", "jutzig/github-release-plugin");
+        computeRepositoryIdData.put("scm:git|git@github.com:jutzig/github-release-plugin.git/module-one", "jutzig/github-release-plugin");
+        computeRepositoryIdData.put("git@github.com:jutzig/github-release-plugin.git/module-one", "jutzig/github-release-plugin");
+    }
 
 	@Test
 	public void testComputeRepositoryId() throws Exception {

@@ -16,14 +16,6 @@ package de.jutzig.github.release.plugin;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.FileSet;
@@ -42,24 +34,28 @@ import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.FileUtils;
-import org.kohsuke.github.GHAsset;
-import org.kohsuke.github.GHRelease;
-import org.kohsuke.github.GHReleaseBuilder;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
+import org.kohsuke.github.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Goal which attaches a file to a GitHub release
- * 
+ *
  * @goal release
- * 
+ *
  * @phase deploy
  */
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * Server id for github access.
-	 * 
+	 *
 	 * @parameter expression="github"
 	 * @required
 	 */
@@ -67,28 +63,28 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * The tag name this release is based on.
-	 * 
+	 *
 	 * @parameter expression="${project.version}"
 	 */
 	private String tag;
 
 	/**
 	 * The name of the release
-	 * 
+	 *
 	 * @parameter expression="${release.name}"
 	 */
 	private String releaseName;
 
 	/**
 	 * The release description
-	 * 
+	 *
 	 * @parameter expression="${project.description}"
 	 */
 	private String description;
 
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
-	 * 
+	 *
 	 * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
 	 * @required
 	 */
@@ -143,7 +139,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
 	 *
 	 * @parameter
-	 * 
+	 *
 	 */
 	private Boolean prerelease;
 
@@ -189,7 +185,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 					uploadAssets(release, set);
 
 		} catch (IOException e) {
-		    
+
 			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
 		}
@@ -240,8 +236,8 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			"^(scm:git[:|])?" +								//Maven prefix for git SCM
 			"(https?://github\\.com/|git@github\\.com:)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
 			"([^/]+/[^/]*?)" +								//Repository ID
-			"(\\.git)?$"									//Optional suffix ".git"
-	, Pattern.CASE_INSENSITIVE);
+            "(\\.git|\\.git/[a-z//-]*?)?$" 					//Optional suffix ".git"
+            , Pattern.CASE_INSENSITIVE);
 
 	public static String computeRepositoryId(String id) {
 		Matcher matcher = REPOSITORY_PATTERN.matcher(id);
@@ -280,7 +276,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * Get server with given id
-	 * 
+	 *
 	 * @param settings
 	 * @param serverId
 	 *            must be non-null and non-empty
