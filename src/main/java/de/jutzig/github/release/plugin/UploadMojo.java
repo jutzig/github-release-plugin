@@ -202,9 +202,16 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 		List<GHAsset> existingAssets = release.getAssets();
 		for ( GHAsset a : existingAssets ){
-			if (a.getName().equals( asset.getName() ) && overwriteArtifact){
-				getLog().info("  Deleting existing asset");
-				a.delete();
+			if (a.getName().equals( asset.getName() )){
+				if(overwriteArtifact) {
+					getLog().info("  Deleting existing asset");
+					a.delete();	
+				}
+				else
+				{
+					getLog().warn("Asset "+asset.getName()+" already exists. Skipping");
+					return;
+				}
 			}
 		}
 
