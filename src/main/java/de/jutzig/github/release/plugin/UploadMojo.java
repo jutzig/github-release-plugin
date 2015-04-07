@@ -60,8 +60,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * Server id for github access.
 	 * 
-	 * @parameter expression="github"
-	 * @required
+	 * @parameter default-value="github" expression="github"
 	 */
 	private String serverId;
 
@@ -260,6 +259,14 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	}
 
 	public GitHub createGithub(String serverId) throws MojoExecutionException, IOException {
+		String usernameProperty = System.getProperty("username");
+		String passwordProperty = System.getProperty("password");
+		if(usernameProperty!=null && passwordProperty!=null)
+		{
+			getLog().debug("Using server credentials from system properties 'username' and 'password'");	
+			return GitHub.connectUsingPassword(usernameProperty, passwordProperty);
+		}
+			
 		Server server = getServer(settings, serverId);
 		if (server == null)
 			throw new MojoExecutionException(MessageFormat.format("Server ''{0}'' not found in settings", serverId));
