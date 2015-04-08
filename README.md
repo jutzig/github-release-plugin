@@ -31,6 +31,8 @@ By default, the plugin will look for your github credentials in your maven `sett
 </servers>
 ```
 
+These credentials can be overridden by setting `username` and `password` as system properties.
+
 Thanks to a contribution from rowanseymour you can also use your API token by adding it as `<privateKey>` to your server definition in the `settings.xml`.
 
 The plugin is available on Maven central
