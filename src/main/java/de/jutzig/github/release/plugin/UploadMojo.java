@@ -316,4 +316,19 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	public void contextualize(Context context) throws ContextException {
 		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
 	}
+	
+	static {
+        //for issue #6 
+        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+        new javax.net.ssl.HostnameVerifier(){
+ 
+            public boolean verify(String hostname,
+                    javax.net.ssl.SSLSession sslSession) {
+                if (hostname.equals("uploads.github.com")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
 }
