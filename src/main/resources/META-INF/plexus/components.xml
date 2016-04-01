@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+      <role-hint>github-release</role-hint>
+      <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+      <configuration>
+	<packaging>jar</packaging>
+	<type>jar</type>
+	<extension>jar</extension>
+	<language>java</language>
+      </configuration>
+    </component>
+
+    <component>
+      <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+      <role-hint>github-release</role-hint>
+      <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+      <configuration>
+	<phases>
+	  <initialize>de.jutzig:github-release-plugin:initialize</initialize>
+	  <validate>de.jutzig:github-release-plugin:validate-project</validate>
+	  <process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>
+	  <compile>de.jutzig:github-release-plugin:validate-application</compile>
+	  <package>de.jutzig:github-release-plugin:package</package>
+	  <install>org.apache.maven.plugins:maven-install-plugin:install</install>
+	  <deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
+	</phases>
+      </configuration>
+    </component>
+  </components>
+</component-set>
