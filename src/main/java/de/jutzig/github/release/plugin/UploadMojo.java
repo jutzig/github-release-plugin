@@ -143,7 +143,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
      *
      * //@parameter default-value=false
      */
-    @Parameter( defaultValue = "false")
+    @Parameter( defaultValue = "false" )
     private Boolean overwriteArtifact;
 
     /**
@@ -151,7 +151,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
      *
      * ////@parameter default-value="github.com"
      */
-    @Parameter( defaultValue = "github.com")
+    @Parameter( defaultValue = "github.com" )
     private String githubHostname;
 
     /**
@@ -171,6 +171,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 * //@parameter
 	 *
 	 */
+    @Parameter
 	private Boolean prerelease;
 
 	public void execute() throws MojoExecutionException {
