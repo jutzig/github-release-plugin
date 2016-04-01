@@ -227,8 +227,8 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	private void uploadAsset(GHRelease release, File asset) throws IOException {
 		getLog().info("Processing asset "+asset.getPath());
-		URL url = new URL(MessageFormat.format(githubApiUploadUrlPrefix + "/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
-
+		URL url = new URL(MessageFormat.format(githubApiUploadUrlPrefix + "/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Integer.toString(release.getId()),asset.getName()));
+        getLog().debug("using following API URL : " + url);
 		List<GHAsset> existingAssets = release.getAssets();
 		for ( GHAsset a : existingAssets ){
 			if (a.getName().equals( asset.getName() )){
