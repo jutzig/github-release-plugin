@@ -255,16 +255,15 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	public String computeRepositoryId(String id) {
 
-        String githubHostnameForRegexp = githubHostname.replaceAll(".", "\\.");
+        String githubHostnameForRegexp = githubHostname.replace(".", "\\.");
 
-        // 	see <a href="https://maven.apache.org/scm/scm-url-format.html">SCM URL Format</a>
         final Pattern REPOSITORY_PATTERN = Pattern.compile(
 			"^(scm:git[:|])?" +								//Maven prefix for git SCM
-			"(https?://" + githubHostnameForRegexp + "/|git@" + githubHostnameForRegexp + ":)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
+            "(https?://" + githubHostnameForRegexp + "/|git@" + githubHostnameForRegexp + ":)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
 			"([^/]+/[^/]*?)" +								//Repository ID
 			"(\\.git)?$"									//Optional suffix ".git"
             , Pattern.CASE_INSENSITIVE);
-
+        getLog().debug("using following repository pattern: " + REPOSITORY_PATTERN.toString());
 
 		Matcher matcher = REPOSITORY_PATTERN.matcher(id);
 		if (matcher.matches()) {

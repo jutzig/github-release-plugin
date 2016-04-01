@@ -57,21 +57,19 @@ public class UploadMojoTest {
 	}
 
 	@Test
-	public void testComputeRepositoryId() throws Exception {
+	public void testComputeRepositoryId_github_com() throws Exception {
 
         File projectCopy = this.resources.getBasedir( "github.com-project" );
         File pom = new File(projectCopy, "pom.xml");
         assertNotNull( pom );
         assertTrue( pom.exists() );
 
-        UploadMojo mojo = (UploadMojo) rule.lookupMojo( "", pom);
+        UploadMojo mojo = (UploadMojo) rule.lookupMojo( "release", pom);
         assertNotNull(mojo);
 
 		for (String source : computeRepositoryIdData.keySet()) {
-			String expected = computeRepositoryIdData.get(source);
-			assertEquals(source, expected, mojo.computeRepositoryId(source));
+            String expected = computeRepositoryIdData.get(source);
+            assertEquals(source, expected, mojo.computeRepositoryId(source));
 		}
-
-        mojo.execute();
 	}
 }
