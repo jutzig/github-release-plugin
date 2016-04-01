@@ -98,8 +98,6 @@ public class UploadMojoTest {
         UploadMojo mojo = (UploadMojo) rule.lookupMojo("release", pom);
         assertNotNull(mojo);
 
-        System.out.println("TESTING ENTERPRISE");
-
 		for (String source : computeRepositoryIdData_github_enterprise.keySet()) {
             String expected = computeRepositoryIdData_github_enterprise.get(source);
             assertEquals(source, expected, mojo.computeRepositoryId(source));
