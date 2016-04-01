@@ -104,7 +104,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 *
 	 * //@parameter expression="${settings}
 	 */
-    @Parameter( defaultValue = "${setting}", readonly = true)
+    @Parameter( defaultValue = "${settings}", readonly = true)
 	private Settings settings;
 
 	/**
