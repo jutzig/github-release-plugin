@@ -58,6 +58,8 @@ import org.kohsuke.github.GitHub;
 @Mojo( name="release", defaultPhase = LifecyclePhase.DEPLOY)
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
+    private final static String DEFAULT_GITHUBHOSTNAME = "github.com";
+
 	/**
 	 *
 	 * //@parameter default-value="github" expression="github"
@@ -151,7 +153,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
      *
      * ////@parameter default-value="github.com"
      */
-    @Parameter( defaultValue = "github.com" )
+    @Parameter( defaultValue = DEFAULT_GITHUBHOSTNAME )
     private String githubHostname;
 
     /**
@@ -314,9 +316,11 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String serverPassword = server.getPassword();
 		String serverAccessToken = server.getPrivateKey();
 		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
-			return GitHub.connectUsingPassword(serverUsername, serverPassword);
+			return DEFAULT_GITHUBHOSTNAME.equals(githubHostname) ? GitHub.connectUsingPassword(serverUsername, serverPassword)
+                    : GitHub.connectToEnterprise(githubApiUploadUrlPrefix, serverUsername, serverPassword);
 		else if (StringUtils.isNotEmpty(serverAccessToken))
-			return GitHub.connectUsingOAuth(serverAccessToken);
+			return DEFAULT_GITHUBHOSTNAME.equals(githubHostname) ? GitHub.connectUsingOAuth(serverAccessToken)
+                    : GitHub.connectToEnterprise(githubApiUploadUrlPrefix, serverAccessToken);
 		else
 			throw new MojoExecutionException("Configuration for server " + serverId + " has no login credentials");
 	}
