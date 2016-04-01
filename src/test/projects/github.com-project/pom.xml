@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>github-release-plugin.unit</groupId>
+	<artifactId>github-release-plugin</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>test-project</name>
+	<description>testing POM for github.com tests</description>
+
+	<scm>
+	  <url>https://github.com/jutzig/github-release-plugin</url>
+	  <connection>scm:git:https://github.com/jutzig/github-release-plugin.git</connection>
+	  <developerConnection>scm:git:https://github.com/jutzig/github-release-plugin.git</developerConnection>
+	  <tag>HEAD</tag>
+	</scm>
+
+        <dependencies>
+          <dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>4.11</version>
+	    <scope>test</scope>
+	  </dependency>
+        </dependencies>
+
+        <build>
+          <plugins>
+            <plugin>
+              <artifactId>github-release-plugin</artifactId>
+              <configuration>
+                <serverId>github-ncia</serverId>
+                <description>Description of your release</description>
+                <releaseName>1.0 Final</releaseName>
+                <tag>${project.version}</tag>
+              </configuration>
+              </plugin>
+          </plugins>
+        </build>
+
+</project>
