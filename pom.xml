@@ -66,6 +66,14 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<goalPrefix>github-release</goalPrefix>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
