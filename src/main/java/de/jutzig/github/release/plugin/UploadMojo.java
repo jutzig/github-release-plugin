@@ -29,6 +29,10 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.FileSet;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
@@ -50,103 +54,112 @@ import org.kohsuke.github.GitHub;
 
 /**
  * Goal which attaches a file to a GitHub release
- *
- * @goal release
- *
- * @phase deploy
  */
+@Mojo( name="release", defaultPhase = LifecyclePhase.DEPLOY)
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
-	 * Server id for github access.
 	 *
-	 * @parameter default-value="github" expression="github"
+	 * //@parameter default-value="github" expression="github"
+	 * Server id for github access.
 	 */
-	private String serverId;
+    @Parameter( defaultValue = "github")
+    private String serverId;
 
 	/**
 	 * The tag name this release is based on.
 	 *
-	 * @parameter expression="${project.version}"
+	 * //@parameter expression="${project.version}"
 	 */
+    @Parameter( property = "project.version" )
 	private String tag;
 
 	/**
 	 * The name of the release
 	 *
-	 * @parameter expression="${release.name}"
+	 * //@parameter expression="${release.name}"
 	 */
-	private String releaseName;
+    @Parameter( property = "release.name" )
+    private String releaseName;
 
 	/**
 	 * The release description
 	 *
-	 * @parameter expression="${project.description}"
+	 * //@parameter expression="${project.description}"
 	 */
+    @Parameter( property = "project.description" )
 	private String description;
 
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
 	 *
-	 * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
+	 * //@parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
 	 * @required
 	 */
+    @Parameter( defaultValue = "${project.scm.connection}", property = "release.repositoryId")
 	private String repositoryId;
 
 	 /**
 	 * The Maven settings
 	 *
-	 * @parameter expression="${settings}
+	 * //@parameter expression="${settings}
 	 */
+    @Parameter( defaultValue = "${setting}", readonly = true)
 	private Settings settings;
 
 	/**
 	 * The Maven session
 	 *
-	 * @parameter expression="${session}"
+	 * //@parameter expression="${session}"
 	 */
+    @Parameter( defaultValue = "${session}", readonly = true)
 	private MavenSession session;
 
 	/**
 	 * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
 	 *
-	 * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
+	 * //@parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
 	 */
+    @Parameter( defaultValue = "${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}",
+                property = "release.artifact")
 	private String artifact;
 
 	/**
 	 * A specific <code>fileSet</code> rule to select files and directories for upload to the release.
 	 *
-	 * @parameter
+	 * //@parameter
 	 */
 	private FileSet fileSet;
 
 	/**
 	 * A list of <code>fileSet</code> rules to select files and directories for upload to the release.
 	 *
-	 * @parameter
+	 * //@parameter
 	 */
 	private List<FileSet> fileSets;
 
     /**
      * Flag to indicate to overwrite the asset in the release if it already exists. Default is false
      *
-     * @parameter default-value=false
+     * //@parameter default-value=false
      */
+    @Parameter( defaultValue = "false")
     private Boolean overwriteArtifact;
 
     /**
      * Github (Enterprise) hostname. Default is 'github.com'
      *
-     * @parameter default-value="github.com"
+     * ////@parameter default-value="github.com"
      */
+    @Parameter( defaultValue = "github.com")
     private String githubHostname;
 
     /**
      * URL prefix to upload the release to Github. Default is 'https://uploads.github.com/'
      *
-     * @parameter default-value="https://uploads.github.com/"
+     * ////@parameter default-value="https://uploads.github.com/"
      */
+    @Parameter( defaultValue = "https://uploads.github.com/")
     private String githubApiUploadUrlPrefix;
 
 	@Requirement
@@ -155,7 +168,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
 	 *
-	 * @parameter
+	 * //@parameter
 	 *
 	 */
 	private Boolean prerelease;
