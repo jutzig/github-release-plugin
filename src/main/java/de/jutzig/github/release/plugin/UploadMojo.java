@@ -50,44 +50,44 @@ import org.kohsuke.github.GitHub;
 
 /**
  * Goal which attaches a file to a GitHub release
- * 
+ *
  * @goal release
- * 
+ *
  * @phase deploy
  */
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * Server id for github access.
-	 * 
+	 *
 	 * @parameter default-value="github" expression="github"
 	 */
 	private String serverId;
 
 	/**
 	 * The tag name this release is based on.
-	 * 
+	 *
 	 * @parameter expression="${project.version}"
 	 */
 	private String tag;
 
 	/**
 	 * The name of the release
-	 * 
+	 *
 	 * @parameter expression="${release.name}"
 	 */
 	private String releaseName;
 
 	/**
 	 * The release description
-	 * 
+	 *
 	 * @parameter expression="${project.description}"
 	 */
 	private String description;
 
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
-	 * 
+	 *
 	 * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
 	 * @required
 	 */
@@ -135,6 +135,20 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
      */
     private Boolean overwriteArtifact;
 
+    /**
+     * Github (Enterprise) hostname. Default is 'github.com'
+     *
+     * @parameter default-value="github.com"
+     */
+    private String githubHostname;
+
+    /**
+     * URL prefix to upload the release to Github. Default is 'https://uploads.github.com/'
+     *
+     * @parameter default-value="https://uploads.github.com/"
+     */
+    private String githubApiUploadUrlPrefix;
+
 	@Requirement
 	private PlexusContainer container;
 
@@ -142,7 +156,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
 	 *
 	 * @parameter
-	 * 
+	 *
 	 */
 	private Boolean prerelease;
 
@@ -188,7 +202,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 					uploadAssets(release, set);
 
 		} catch (IOException e) {
-		    
+
 			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
 		}
@@ -197,14 +211,14 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	private void uploadAsset(GHRelease release, File asset) throws IOException {
 		getLog().info("Processing asset "+asset.getPath());
-		URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
+		URL url = new URL(MessageFormat.format(githubApiUploadUrlPrefix + "/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
 
 		List<GHAsset> existingAssets = release.getAssets();
 		for ( GHAsset a : existingAssets ){
 			if (a.getName().equals( asset.getName() )){
 				if(overwriteArtifact) {
 					getLog().info("  Deleting existing asset");
-					a.delete();	
+					a.delete();
 				}
 				else
 				{
@@ -239,17 +253,19 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		return null;
 	}
 
-	/**
-	 * @see <a href="https://maven.apache.org/scm/scm-url-format.html">SCM URL Format</a>
-	 */
-	private static final Pattern REPOSITORY_PATTERN = Pattern.compile(
+	public String computeRepositoryId(String id) {
+
+        String githubHostnameForRegexp = githubHostname.replaceAll(".", "\\.");
+
+        // 	see <a href="https://maven.apache.org/scm/scm-url-format.html">SCM URL Format</a>
+        final Pattern REPOSITORY_PATTERN = Pattern.compile(
 			"^(scm:git[:|])?" +								//Maven prefix for git SCM
-			"(https?://github\\.com/|git@github\\.com:)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
+			"(https?://" + githubHostnameForRegexp + "/|git@" + githubHostnameForRegexp + ":)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
 			"([^/]+/[^/]*?)" +								//Repository ID
 			"(\\.git)?$"									//Optional suffix ".git"
-	, Pattern.CASE_INSENSITIVE);
+            , Pattern.CASE_INSENSITIVE);
 
-	public static String computeRepositoryId(String id) {
+
 		Matcher matcher = REPOSITORY_PATTERN.matcher(id);
 		if (matcher.matches()) {
 			return matcher.group(3);
@@ -263,10 +279,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String passwordProperty = System.getProperty("password");
 		if(usernameProperty!=null && passwordProperty!=null)
 		{
-			getLog().debug("Using server credentials from system properties 'username' and 'password'");	
+			getLog().debug("Using server credentials from system properties 'username' and 'password'");
 			return GitHub.connectUsingPassword(usernameProperty, passwordProperty);
 		}
-			
+
 		Server server = getServer(settings, serverId);
 		if (server == null)
 			throw new MojoExecutionException(MessageFormat.format("Server ''{0}'' not found in settings", serverId));
@@ -294,7 +310,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * Get server with given id
-	 * 
+	 *
 	 * @param settings
 	 * @param serverId
 	 *            must be non-null and non-empty
