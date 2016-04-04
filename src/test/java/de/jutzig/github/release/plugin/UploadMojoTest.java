@@ -29,7 +29,7 @@ public class UploadMojoTest {
 
 	private Map<String, String> computeRepositoryIdData_github;
     private Map<String, String> computeRepositoryIdData_github_enterprise;
-
+    private Map<String, String> ensureNoTrailingSlash;
 
     @Before
 	public void setUp() throws Exception {
@@ -69,6 +69,14 @@ public class UploadMojoTest {
 		computeRepositoryIdData_github_enterprise.put("scm:git|https://some-github-enterprise-server.domain/jutzig/github-release-plugin", "jutzig/github-release-plugin");
 		computeRepositoryIdData_github_enterprise.put("https://some-github-enterprise-server.domain/jutzig/github-release-plugin", "jutzig/github-release-plugin");
 
+        ensureNoTrailingSlash = new HashMap<String, String>();
+
+        ensureNoTrailingSlash.put(null, null);
+        ensureNoTrailingSlash.put("", "");
+        ensureNoTrailingSlash.put("no trailing slash", "no trailing slash");
+        ensureNoTrailingSlash.put("trailing slash/", "trailing slash");
+        ensureNoTrailingSlash.put("no trailing slash trimmed     ", "no trailing slash trimmed");
+        ensureNoTrailingSlash.put("trimmed trailing slash/    ", "trimmed trailing slash");
 	}
 
 	@Test
@@ -103,5 +111,22 @@ public class UploadMojoTest {
             assertEquals(source, expected, mojo.computeRepositoryId(source));
 		}
 	}
+
+    @Test
+    public void testEnsureNoTrailingSlash() throws Exception {
+
+        File testProjectDir = this.resources.getBasedir( "github.com" );
+        assertNotNull( testProjectDir );
+        assertTrue( testProjectDir.exists() );
+
+        UploadMojo mojo = (UploadMojo) rule.lookupConfiguredMojo( testProjectDir , "release");
+        assertNotNull(mojo);
+
+		for (String str : ensureNoTrailingSlash.keySet()) {
+            String expected = ensureNoTrailingSlash.get(str);
+            assertEquals(str, expected, mojo.ensureNoTrailingSlash(str));
+		}
+
+    }
 
 }

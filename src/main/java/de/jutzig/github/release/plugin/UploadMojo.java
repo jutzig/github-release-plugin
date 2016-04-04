@@ -354,4 +354,17 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	public void contextualize(Context context) throws ContextException {
 		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
 	}
+
+    /**
+     * @param str
+     * @return trimmed str minus the trailing '/', if any
+     */
+    String ensureNoTrailingSlash(String str) {
+        if(str == null || str.isEmpty()) {
+            return str;
+        }
+        String strTrimmed = str.trim();
+        return strTrimmed.endsWith("/") ? strTrimmed.substring(0, strTrimmed.length() - 1) : strTrimmed;
+    }
+
 }
