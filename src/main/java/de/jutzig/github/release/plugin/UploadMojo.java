@@ -29,6 +29,10 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.FileSet;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
@@ -50,90 +54,122 @@ import org.kohsuke.github.GitHub;
 
 /**
  * Goal which attaches a file to a GitHub release
- * 
- * @goal release
- * 
- * @phase deploy
  */
+@Mojo( name="release", defaultPhase = LifecyclePhase.DEPLOY)
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
+    private final static String DEFAULT_GITHUBHOSTNAME = "github.com";
+    private final static String DEFAULT_GITAPIURLPREFIX = "https://api.github.com";
+
 	/**
+	 *
+	 * //@parameter default-value="github" expression="github"
 	 * Server id for github access.
-	 * 
-	 * @parameter default-value="github" expression="github"
 	 */
-	private String serverId;
+    @Parameter( defaultValue = "github")
+    private String serverId;
 
 	/**
 	 * The tag name this release is based on.
-	 * 
-	 * @parameter expression="${project.version}"
+	 *
+	 * //@parameter expression="${project.version}"
 	 */
+    @Parameter( property = "project.version" )
 	private String tag;
 
 	/**
 	 * The name of the release
-	 * 
-	 * @parameter expression="${release.name}"
+	 *
+	 * //@parameter expression="${release.name}"
 	 */
-	private String releaseName;
+    @Parameter( property = "release.name" )
+    private String releaseName;
 
 	/**
 	 * The release description
-	 * 
-	 * @parameter expression="${project.description}"
+	 *
+	 * //@parameter expression="${project.description}"
 	 */
+    @Parameter( property = "project.description" )
 	private String description;
 
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
-	 * 
-	 * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
+	 *
+	 * //@parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
 	 * @required
 	 */
+    @Parameter( defaultValue = "${project.scm.connection}", property = "release.repositoryId")
 	private String repositoryId;
 
 	 /**
 	 * The Maven settings
 	 *
-	 * @parameter expression="${settings}
+	 * //@parameter expression="${settings}
 	 */
+    @Parameter( defaultValue = "${settings}", readonly = true)
 	private Settings settings;
 
 	/**
 	 * The Maven session
 	 *
-	 * @parameter expression="${session}"
+	 * //@parameter expression="${session}"
 	 */
+    @Parameter( defaultValue = "${session}", readonly = true)
 	private MavenSession session;
 
 	/**
 	 * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
 	 *
-	 * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
+	 * //@parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
 	 */
+    @Parameter( defaultValue = "${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}",
+                property = "release.artifact")
 	private String artifact;
 
 	/**
 	 * A specific <code>fileSet</code> rule to select files and directories for upload to the release.
 	 *
-	 * @parameter
+	 * //@parameter
 	 */
 	private FileSet fileSet;
 
 	/**
 	 * A list of <code>fileSet</code> rules to select files and directories for upload to the release.
 	 *
-	 * @parameter
+	 * //@parameter
 	 */
 	private List<FileSet> fileSets;
 
     /**
      * Flag to indicate to overwrite the asset in the release if it already exists. Default is false
      *
-     * @parameter default-value=false
+     * //@parameter default-value=false
      */
+    @Parameter( defaultValue = "false" )
     private Boolean overwriteArtifact;
+
+    /**
+     * Github (Enterprise) hostname. Default is 'github.com'
+     *
+     * ////@parameter default-value="github.com"
+     */
+    @Parameter( defaultValue = DEFAULT_GITHUBHOSTNAME )
+    private String githubHostname;
+
+    /**
+     * Github (Enterprise) API URL (prefix). Default is 'https://api.github.com'
+     */
+    @Parameter( defaultValue = DEFAULT_GITAPIURLPREFIX )
+    private String githubApiUrlPrefix;
+
+    /**
+     * URL prefix to upload the release to Github. Default is 'https://uploads.github.com/'
+     *
+     * ////@parameter default-value="https://uploads.github.com/"
+     */
+    @Parameter( defaultValue = "https://uploads.github.com/")
+    private String githubApiUploadUrlPrefix;
 
 	@Requirement
 	private PlexusContainer container;
@@ -141,9 +177,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
 	 *
-	 * @parameter
-	 * 
+	 * //@parameter
+	 *
 	 */
+    @Parameter
 	private Boolean prerelease;
 
 	public void execute() throws MojoExecutionException {
@@ -188,7 +225,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 					uploadAssets(release, set);
 
 		} catch (IOException e) {
-		    
+
 			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
 		}
@@ -197,14 +234,12 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	private void uploadAsset(GHRelease release, File asset) throws IOException {
 		getLog().info("Processing asset "+asset.getPath());
-		URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
-
 		List<GHAsset> existingAssets = release.getAssets();
 		for ( GHAsset a : existingAssets ){
 			if (a.getName().equals( asset.getName() )){
 				if(overwriteArtifact) {
 					getLog().info("  Deleting existing asset");
-					a.delete();	
+					a.delete();
 				}
 				else
 				{
@@ -216,7 +251,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 		getLog().info("  Upload asset");
 		// for some reason this doesn't work currently
-		release.uploadAsset(asset, "application/zip");
+		release.uploadAsset(asset, "application/zip", ensureNoTrailingSlash(githubApiUploadUrlPrefix));
 	}
 
 	private void uploadAssets(GHRelease release, FileSet fileset) throws IOException {
@@ -239,17 +274,18 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		return null;
 	}
 
-	/**
-	 * @see <a href="https://maven.apache.org/scm/scm-url-format.html">SCM URL Format</a>
-	 */
-	private static final Pattern REPOSITORY_PATTERN = Pattern.compile(
+	public String computeRepositoryId(String id) {
+
+        String githubHostnameForRegexp = githubHostname.replace(".", "\\.");
+
+        final Pattern REPOSITORY_PATTERN = Pattern.compile(
 			"^(scm:git[:|])?" +								//Maven prefix for git SCM
-			"(https?://github\\.com/|git@github\\.com:)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
+            "(https?://" + githubHostnameForRegexp + "/|git@" + githubHostnameForRegexp + ":)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
 			"([^/]+/[^/]*?)" +								//Repository ID
 			"(\\.git)?$"									//Optional suffix ".git"
-	, Pattern.CASE_INSENSITIVE);
+            , Pattern.CASE_INSENSITIVE);
+        getLog().debug("using following repository pattern: " + REPOSITORY_PATTERN.toString());
 
-	public static String computeRepositoryId(String id) {
 		Matcher matcher = REPOSITORY_PATTERN.matcher(id);
 		if (matcher.matches()) {
 			return matcher.group(3);
@@ -263,10 +299,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String passwordProperty = System.getProperty("password");
 		if(usernameProperty!=null && passwordProperty!=null)
 		{
-			getLog().debug("Using server credentials from system properties 'username' and 'password'");	
+			getLog().debug("Using server credentials from system properties 'username' and 'password'");
 			return GitHub.connectUsingPassword(usernameProperty, passwordProperty);
 		}
-			
+
 		Server server = getServer(settings, serverId);
 		if (server == null)
 			throw new MojoExecutionException(MessageFormat.format("Server ''{0}'' not found in settings", serverId));
@@ -285,16 +321,18 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String serverPassword = server.getPassword();
 		String serverAccessToken = server.getPrivateKey();
 		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
-			return GitHub.connectUsingPassword(serverUsername, serverPassword);
+			return DEFAULT_GITHUBHOSTNAME.equals(githubHostname) ? GitHub.connectUsingPassword(serverUsername, serverPassword)
+                    : GitHub.connectToEnterprise(githubApiUrlPrefix, serverUsername, serverPassword);
 		else if (StringUtils.isNotEmpty(serverAccessToken))
-			return GitHub.connectUsingOAuth(serverAccessToken);
+			return DEFAULT_GITHUBHOSTNAME.equals(githubHostname) ? GitHub.connectUsingOAuth(serverAccessToken)
+                    : GitHub.connectToEnterprise(githubApiUrlPrefix, serverAccessToken);
 		else
 			throw new MojoExecutionException("Configuration for server " + serverId + " has no login credentials");
 	}
 
 	/**
 	 * Get server with given id
-	 * 
+	 *
 	 * @param settings
 	 * @param serverId
 	 *            must be non-null and non-empty
@@ -316,4 +354,17 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	public void contextualize(Context context) throws ContextException {
 		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
 	}
+
+    /**
+     * @param str
+     * @return trimmed str minus the trailing '/', if any
+     */
+    String ensureNoTrailingSlash(String str) {
+        if(str == null || str.isEmpty()) {
+            return str;
+        }
+        String strTrimmed = str.trim();
+        return strTrimmed.endsWith("/") ? strTrimmed.substring(0, strTrimmed.length() - 1) : strTrimmed;
+    }
+
 }
