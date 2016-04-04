@@ -59,6 +59,7 @@ import org.kohsuke.github.GitHub;
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
     private final static String DEFAULT_GITHUBHOSTNAME = "github.com";
+    private final static String DEFAULT_GITAPIURLPREFIX = "https://api.github.com";
 
 	/**
 	 *
@@ -157,6 +158,12 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
     private String githubHostname;
 
     /**
+     * Github (Enterprise) API URL (prefix). Default is 'https://api.github.com'
+     */
+    @Parameter( defaultValue = DEFAULT_GITAPIURLPREFIX )
+    private String githubApiUrlPrefix;
+
+    /**
      * URL prefix to upload the release to Github. Default is 'https://uploads.github.com/'
      *
      * ////@parameter default-value="https://uploads.github.com/"
@@ -227,8 +234,6 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	private void uploadAsset(GHRelease release, File asset) throws IOException {
 		getLog().info("Processing asset "+asset.getPath());
-		URL url = new URL(MessageFormat.format(githubApiUploadUrlPrefix + "/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Integer.toString(release.getId()),asset.getName()));
-        getLog().debug("using following API URL : " + url);
 		List<GHAsset> existingAssets = release.getAssets();
 		for ( GHAsset a : existingAssets ){
 			if (a.getName().equals( asset.getName() )){
@@ -246,7 +251,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 		getLog().info("  Upload asset");
 		// for some reason this doesn't work currently
-		release.uploadAsset(asset, "application/zip");
+		release.uploadAsset(asset, "application/zip", ensureNoTrailingSlash(githubApiUploadUrlPrefix));
 	}
 
 	private void uploadAssets(GHRelease release, FileSet fileset) throws IOException {
@@ -317,10 +322,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String serverAccessToken = server.getPrivateKey();
 		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
 			return DEFAULT_GITHUBHOSTNAME.equals(githubHostname) ? GitHub.connectUsingPassword(serverUsername, serverPassword)
-                    : GitHub.connectToEnterprise(githubApiUploadUrlPrefix, serverUsername, serverPassword);
+                    : GitHub.connectToEnterprise(githubApiUrlPrefix, serverUsername, serverPassword);
 		else if (StringUtils.isNotEmpty(serverAccessToken))
 			return DEFAULT_GITHUBHOSTNAME.equals(githubHostname) ? GitHub.connectUsingOAuth(serverAccessToken)
-                    : GitHub.connectToEnterprise(githubApiUploadUrlPrefix, serverAccessToken);
+                    : GitHub.connectToEnterprise(githubApiUrlPrefix, serverAccessToken);
 		else
 			throw new MojoExecutionException("Configuration for server " + serverId + " has no login credentials");
 	}
