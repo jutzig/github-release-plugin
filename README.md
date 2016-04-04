@@ -51,7 +51,7 @@ Thanks to a contribution from rowanseymour you can also use your API token by ad
 ## GitHub Enterprise users
 
 It is also possible to upload to GitHub Enterprise. For that, two additional options are available
-in the configuration: `githubHostname` and `githubApiUploadUrlPrefix`. They can be used like this:
+in the configuration: `githubHostname`, `githubApiUrlPrefix` and `githubApiUploadUrlPrefix`. They can be used like this:
 
 ```
 <plugin>
@@ -64,6 +64,7 @@ in the configuration: `githubHostname` and `githubApiUploadUrlPrefix`. They can 
         <tag>${project.version}</tag>
         <!-- GitHub Enterprise settings -->
         <githubHostname>github-enterprise.domain</githubHostname>
+        <githubApiUrlPrefix>http://github-enterprise.domain/api/v3</githubApiUrlPrefix>
         <githubApiUploadUrlPrefix>https://github-enterprise.domain/api/v3</githubApiUploadUrlPrefix>
         ...
     </configuration>
