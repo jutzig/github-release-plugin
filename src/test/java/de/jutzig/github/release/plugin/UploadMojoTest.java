@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class UploadMojoTest {
 
@@ -39,5 +41,21 @@ public class UploadMojoTest {
 			String expected = computeRepositoryIdData.get(source);
 			assertEquals(source, expected, UploadMojo.computeRepositoryId(source));
 		}
+	}
+
+	@Test
+	public void testGuessPreRelease() {
+		assertTrue(UploadMojo.guessPreRelease("1.0-SNAPSHOT"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-alpha"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-alpha-1"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-beta"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-beta-1"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-RC"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-RC1"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-rc1"));
+		assertTrue(UploadMojo.guessPreRelease("1.0-rc-1"));
+
+		assertFalse(UploadMojo.guessPreRelease("1"));
+		assertFalse(UploadMojo.guessPreRelease("1.0"));
 	}
 }
