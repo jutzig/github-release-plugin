@@ -140,6 +140,8 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * If this is a prerelease. Will be set by default according to ${project.version} (see {@link #guessPreRelease(String)}.
+	 * 
+	 * @parameter
 	 */
 	private Boolean prerelease;
 
