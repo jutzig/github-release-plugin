@@ -139,10 +139,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	private PlexusContainer container;
 
 	/**
-	 * If this is a prerelease. By default it will use <code>true</code> if the tag ends in -SNAPSHOT
-	 *
-	 * @parameter
-	 * 
+	 * If this is a prerelease. Will be set by default according to ${project.version} (see {@link #guessPreRelease(String)}.
 	 */
 	private Boolean prerelease;
 
@@ -150,7 +147,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		if(releaseName==null)
 			releaseName = tag;
 		if(prerelease==null)
-			prerelease = tag.endsWith("-SNAPSHOT");
+			prerelease = guessPreRelease(tag);
 		repositoryId = computeRepositoryId(repositoryId);
 		GHRelease release = null;
 		try {
@@ -315,5 +312,16 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	public void contextualize(Context context) throws ContextException {
 		container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
+	}
+
+	/**
+	 * Guess if a version defined in POM should be considered as {@link #prerelease}.
+	 */
+	static boolean guessPreRelease(String version) {
+		boolean preRelease = version.endsWith("-SNAPSHOT")
+				|| StringUtils.containsIgnoreCase(version, "-alpha")
+				|| StringUtils.containsIgnoreCase(version, "-beta")
+				|| StringUtils.containsIgnoreCase(version, "-RC");
+		return preRelease;
 	}
 }
