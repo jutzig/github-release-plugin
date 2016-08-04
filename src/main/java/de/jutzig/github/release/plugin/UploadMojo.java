@@ -16,7 +16,13 @@ package de.jutzig.github.release.plugin;
  * limitations under the License.
  */
 
-import static java.lang.Thread.sleep;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.execution.MavenSession;
@@ -41,14 +47,6 @@ import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHReleaseBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Goal which attaches a file to a GitHub release
@@ -243,7 +241,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 							, attempt + 1
 							, retryUploadCount));
 					try {
-						sleep(retryUploadTimeout);
+						Thread.sleep(retryUploadTimeout);
 					} catch (InterruptedException e1) {
 						throw new IOException(e1);
 					}
