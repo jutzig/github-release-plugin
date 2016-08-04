@@ -16,13 +16,7 @@ package de.jutzig.github.release.plugin;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import static java.lang.Thread.sleep;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.execution.MavenSession;
@@ -47,6 +41,14 @@ import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHReleaseBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Goal which attaches a file to a GitHub release
@@ -145,6 +147,20 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 */
 	private Boolean prerelease;
 
+	/**
+	 * Number of attempts to upload, defaults to 5.
+	 *
+	 * @parameter default-value=5
+	 */
+	private int retryUploadCount = 5;
+
+	/**
+	 * Retry timeout between failing uploads, defaults to 10 seconds.
+	 *
+	 * @parameter default-value=10000
+	 */
+	private int retryUploadTimeout = 10000;
+
 	public void execute() throws MojoExecutionException {
 		if(releaseName==null)
 			releaseName = tag;
@@ -214,8 +230,28 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		}
 
 		getLog().info("  Upload asset");
-		// for some reason this doesn't work currently
-		release.uploadAsset(asset, "application/zip");
+		int attempt = 0;
+		do {
+			try {
+				release.uploadAsset(asset, "application/zip");
+				break;
+			} catch (IOException e) {
+				if (attempt < retryUploadCount) {
+					getLog().warn(String.format("Asset %s failed to upload, retrying in %d seconds (%d/%d)."
+							, asset.getName()
+							, retryUploadTimeout / 1000
+							, attempt + 1
+							, retryUploadCount));
+					try {
+						sleep(retryUploadTimeout);
+					} catch (InterruptedException e1) {
+						throw new IOException(e1);
+					}
+				} else {
+					throw e;
+				}
+			}
+		} while (attempt++ <= retryUploadTimeout);
 	}
 
 	private void uploadAssets(GHRelease release, FileSet fileset) throws IOException {
