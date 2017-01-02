@@ -86,6 +86,20 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	private String description;
 
 	/**
+	 * The commitish to use
+	 *
+	 * @parameter expression="github.commitish"
+	 */
+	private String commitish;
+
+	/**
+	 * Whether or not the release should be draft
+	 *
+	 * @parameter expression="github.draft"
+	 */
+	private Boolean draft;
+
+	/**
 	 * The github id of the project. By default initialized from the project scm connection
 	 * 
 	 * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
@@ -161,6 +175,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 				GHReleaseBuilder builder = repository.createRelease(tag);
 				if(description!=null)
 					builder.body(description);
+				if (commitish!=null)
+					builder.commitish(commitish);
+				if (draft!=null)
+					builder.draft(draft);
 				builder.prerelease(prerelease);
 				builder.name(releaseName);
 				release = builder.create();
@@ -323,7 +341,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		boolean preRelease = version.endsWith("-SNAPSHOT")
 				|| StringUtils.containsIgnoreCase(version, "-alpha")
 				|| StringUtils.containsIgnoreCase(version, "-beta")
-				|| StringUtils.containsIgnoreCase(version, "-RC");
+				|| StringUtils.containsIgnoreCase(version, "-RC")
+				|| StringUtils.containsIgnoreCase(version, ".RC")
+				|| StringUtils.containsIgnoreCase(version, ".M")
+				|| StringUtils.containsIgnoreCase(version, ".BUILD_SNAPSHOT");
 		return preRelease;
 	}
 }
