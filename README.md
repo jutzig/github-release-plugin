@@ -50,7 +50,7 @@ Thanks to a contribution from rowanseymour you can also use your API token by ad
 
 Additional Parameters:
 
- * @-Dgithub.draft=true@ creates the release in draft state
- * @-Dgithub.commitish=release/1.0.0@ allows to specify a commitsh
+ * `-Dgithub.draft=true` creates the release in draft state
+ * `-Dgithub.commitish=release/1.0.0` allows to specify a commitsh
 
 The plugin is available on Maven central
