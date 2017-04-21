@@ -1,6 +1,8 @@
 github-release-plugin
 =====================
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.jutzig/github-release-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.jutzig/github-release-plugin)
+
 uses the github release api to upload files
 
 To use the plugin you need to configure it in your `pom.xml` like so
