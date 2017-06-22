@@ -160,6 +160,13 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 */
 	private Boolean prerelease;
 
+	/**
+	 * Fail plugin execution if release already exists.
+	 *
+	 * @parameter default-value=false
+	 */
+	private Boolean failOnExistingRelease;
+
 	public void execute() throws MojoExecutionException {
 		if(releaseName==null)
 			releaseName = tag;
@@ -185,12 +192,19 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 				release = builder.create();
 			}
 			else {
-				getLog().info("Release "+releaseName+" already exists. Not creating");
+				String message = "Release " + releaseName + " already exists. Not creating";
+
+				if (failOnExistingRelease) {
+					throw new MojoExecutionException(message);
+				}
+
+				getLog().info(message);
 			}
 		} catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException("Failed to create release", e);
         }
+
 		try {
 			if(artifact != null && !artifact.trim().isEmpty()) {
 				File asset = new File(artifact);
@@ -210,7 +224,6 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			getLog().error(e);
 			throw new MojoExecutionException("Failed to upload assets", e);
 		}
-
 	}
 
 	private void uploadAsset(GHRelease release, File asset) throws IOException {
