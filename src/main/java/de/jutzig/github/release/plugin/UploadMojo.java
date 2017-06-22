@@ -160,6 +160,20 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 */
 	private Boolean prerelease;
 
+	/**
+	 * Number of attempts to upload, defaults to 5.
+	 *
+	 * @parameter default-value=5
+	 */
+	private int retryUploadCount = 5;
+
+	/**
+	 * Retry timeout between failing uploads, defaults to 10 seconds.
+	 *
+	 * @parameter default-value=10000
+	 */
+	private int retryUploadTimeout = 10000;
+
 	public void execute() throws MojoExecutionException {
 		if(releaseName==null)
 			releaseName = tag;
@@ -233,8 +247,28 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		}
 
 		getLog().info("  Upload asset");
-		// for some reason this doesn't work currently
-		release.uploadAsset(asset, "application/zip");
+		int attempt = 0;
+		do {
+			try {
+				release.uploadAsset(asset, "application/zip");
+				break;
+			} catch (IOException e) {
+				if (attempt < retryUploadCount) {
+					getLog().warn(String.format("Asset %s failed to upload, retrying in %d seconds (%d/%d)."
+							, asset.getName()
+							, retryUploadTimeout / 1000
+							, attempt + 1
+							, retryUploadCount));
+					try {
+						Thread.sleep(retryUploadTimeout);
+					} catch (InterruptedException e1) {
+						throw new IOException(e1);
+					}
+				} else {
+					throw e;
+				}
+			}
+		} while (attempt++ <= retryUploadTimeout);
 	}
 
 	private void uploadAssets(GHRelease release, FileSet fileset) throws IOException {
