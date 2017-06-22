@@ -47,6 +47,7 @@ import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHReleaseBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.PagedIterable;
 
 /**
  * Goal which attaches a file to a GitHub release
@@ -246,10 +247,10 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			uploadAsset(release, asset);
 	}
 
-	private GHRelease findRelease(GHRepository repository, String releaseName2) throws IOException {
-		List<GHRelease> releases = repository.getReleases();
+	private GHRelease findRelease(GHRepository repository, String releaseNameToFind) throws IOException {
+        PagedIterable<GHRelease> releases = repository.listReleases();
 		for (GHRelease ghRelease : releases) {
-			if(ghRelease.getName().equals(releaseName2)) {
+			if (releaseNameToFind.equals(ghRelease.getName())) {
 				return ghRelease;
 			}
 		}

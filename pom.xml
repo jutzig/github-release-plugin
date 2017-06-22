@@ -154,7 +154,7 @@
 		<dependency>
 			<groupId>org.kohsuke</groupId>
 			<artifactId>github-api</artifactId>
-			<version>1.49</version>
+			<version>1.85</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
