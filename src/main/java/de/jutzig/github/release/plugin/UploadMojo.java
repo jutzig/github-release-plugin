@@ -18,7 +18,6 @@ package de.jutzig.github.release.plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -42,46 +41,41 @@ import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.FileUtils;
-import org.kohsuke.github.GHAsset;
-import org.kohsuke.github.GHRelease;
-import org.kohsuke.github.GHReleaseBuilder;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.PagedIterable;
+import org.kohsuke.github.*;
 
 /**
  * Goal which attaches a file to a GitHub release
- * 
+ *
  * @goal release
- * 
+ *
  * @phase deploy
  */
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * Server id for github access.
-	 * 
+	 *
 	 * @parameter default-value="github" expression="github"
 	 */
 	private String serverId;
 
 	/**
 	 * The tag name this release is based on.
-	 * 
+	 *
 	 * @parameter expression="${project.version}"
 	 */
 	private String tag;
 
 	/**
 	 * The name of the release
-	 * 
+	 *
 	 * @parameter expression="${release.name}"
 	 */
 	private String releaseName;
 
 	/**
 	 * The release description
-	 * 
+	 *
 	 * @parameter expression="${project.description}"
 	 */
 	private String description;
@@ -102,7 +96,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
-	 * 
+	 *
 	 * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
 	 * @required
 	 */
@@ -150,12 +144,19 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
      */
     private Boolean overwriteArtifact;
 
+	/**
+	 * Flag to indicate whether to remove releases, if they exist, before re-creating them. Default is false
+	 *
+	 * @parameter default-value=false
+	 */
+	private Boolean deleteRelease;
+
 	@Requirement
 	private PlexusContainer container;
 
 	/**
 	 * If this is a prerelease. Will be set by default according to ${project.version} (see {@link #guessPreRelease(String)}.
-	 * 
+	 *
 	 * @parameter
 	 */
 	private Boolean prerelease;
@@ -178,28 +179,39 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			GitHub gitHub = createGithub(serverId);
 			GHRepository repository = gitHub.getRepository(repositoryId);
 			release = findRelease(repository,releaseName);
-			if(release==null) {
-				getLog().info("Creating release "+releaseName);
-				GHReleaseBuilder builder = repository.createRelease(tag);
-				if(description!=null)
-					builder.body(description);
-				if (commitish!=null)
-					builder.commitish(commitish);
-				if (draft!=null)
-					builder.draft(draft);
-				builder.prerelease(prerelease);
-				builder.name(releaseName);
-				release = builder.create();
-			}
-			else {
+			if (release != null) {
 				String message = "Release " + releaseName + " already exists. Not creating";
 
 				if (failOnExistingRelease) {
 					throw new MojoExecutionException(message);
 				}
 
+				if (deleteRelease) {
+					getLog().info("Removing existing release " + release.getName() + "...");
+
+					release.delete();
+
+					getLog().info("Release " + release.getName() + " removed successfully.");
+				}
+
 				getLog().info(message);
 			}
+
+			getLog().info("Creating release "+releaseName);
+			GHReleaseBuilder builder = repository.createRelease(tag);
+			if(description!=null) {
+				builder.body(description);
+			}
+			if (commitish!=null) {
+				builder.commitish(commitish);
+			}
+			if (draft!=null) {
+				builder.draft(draft);
+			}
+
+			builder.prerelease(prerelease);
+			builder.name(releaseName);
+			release = builder.create();
 		} catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException("Failed to create release", e);
@@ -208,8 +220,9 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		try {
 			if(artifact != null && !artifact.trim().isEmpty()) {
 				File asset = new File(artifact);
-				if(asset.exists())
+				if(asset.exists()) {
 					uploadAsset(release, asset);
+				}
 			}
 
 			if(fileSet != null)
@@ -228,7 +241,6 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 
 	private void uploadAsset(GHRelease release, File asset) throws IOException {
 		getLog().info("Processing asset "+asset.getPath());
-		URL url = new URL(MessageFormat.format("https://uploads.github.com/repos/{0}/releases/{1}/assets?name={2}",repositoryId,Long.toString(release.getId()),asset.getName()));
 
 		List<GHAsset> existingAssets = release.getAssets();
 		for ( GHAsset a : existingAssets ){
