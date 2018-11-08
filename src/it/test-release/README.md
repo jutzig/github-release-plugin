@@ -1,7 +1,7 @@
 # How this works
 
 * The `maven-invoker-plugin` uses it's own `settings.xml` which is merged with the one from `~/.m2/settings.xml`.
-* The credentials for deploying toe Github are under the `~/.m2/settings.xml`, so as to not having to add them
+* The credentials for deploying too Github are under the `~/.m2/settings.xml`, so as to not having to add them
   as sources.
 * The `repositoryId` and expected `serverId` in the `~/.m2/settings.xml` file are as follows
 ```
