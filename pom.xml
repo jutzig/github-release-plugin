@@ -52,42 +52,36 @@
 	<build>
 		<plugins>
 			<plugin>
-				<!-- taken from http://maven.apache.org/plugin-tools/maven-plugin-plugin/examples/using-annotations.html -->
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.6.0</version>
+				<artifactId>maven-invoker-plugin</artifactId>
+				<version>3.1.0</version>
 				<configuration>
-					<!-- see http://jira.codehaus.org/browse/MNG-5346 -->
-					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+					<debug>false</debug>
+					<preBuildHookScript>clean</preBuildHookScript>
+					<postBuildHookScript>verify</postBuildHookScript>
+					<settingsFile>src/it/settings.xml</settingsFile>
+					<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+					<addTestClassPath>true</addTestClassPath>
+					<mergeUserSettings>true</mergeUserSettings>
 				</configuration>
 				<executions>
 					<execution>
-						<id>mojo-descriptor</id>
+						<id>integration-tests-with-poms</id>
 						<goals>
-							<goal>descriptor</goal>
+							<goal>install</goal>
+							<goal>run</goal>
 						</goals>
-					</execution>
-					<!-- if you want to generate help goal -->
-					<execution>
-						<id>help-goal</id>
-						<goals>
-							<goal>helpmojo</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 
-			<plugin>
-				<groupId>org.codehaus.plexus</groupId>
-				<artifactId>plexus-component-metadata</artifactId>
-				<version>1.7.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate-metadata</goal>
-						</goals>
+						<phase>package</phase>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-all</artifactId>
+						<version>2.4.5</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 
 			<plugin>

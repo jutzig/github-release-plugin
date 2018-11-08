@@ -309,7 +309,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			getLog().debug("Using server credentials from system properties 'username' and 'password'");	
 			return GitHub.connectUsingPassword(usernameProperty, passwordProperty);
 		}
-			
+
 		Server server = getServer(settings, serverId);
 		if (server == null)
 			throw new MojoExecutionException(MessageFormat.format("Server ''{0}'' not found in settings", serverId));
