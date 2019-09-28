@@ -1,0 +1,30 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.jutzig</groupId>
+    <artifactId>test-parent</artifactId>
+    <version>@project.version@</version>
+    <packaging>pom</packaging>
+
+    <scm>
+        <connection>scm:git:git@github.com:jutzig/github-release-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jutzig/github-release-plugin.git</developerConnection>
+        <url>https://github.com/jutzig/github-release-plugin/tree/${project.scm.tag}</url>
+        <tag>master</tag>
+    </scm>
+
+	<modules>
+		<module>child1</module>
+		<module>child2</module>
+	</modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

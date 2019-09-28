@@ -1,0 +1,56 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+	    <groupId>de.jutzig</groupId>
+	    <artifactId>test-parent</artifactId>
+		<version>@project.version@</version>
+	</parent>
+    <artifactId>child2</artifactId>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+		<plugins>
+			<plugin>
+				<groupId>@project.groupId@</groupId>
+				<artifactId>@project.artifactId@</artifactId>
+				<version>@project.version@</version>
+
+                <configuration>
+                    <description>Test artifact ${project.version}.</description>
+                    <releaseName>${project.version}</releaseName>
+                    <tag>${project.version}</tag>
+
+                    <overwriteArtifact>false</overwriteArtifact>
+                    <serverId>jutzig/github-release-plugin</serverId>
+                    <deleteRelease>false</deleteRelease>
+
+                    <fileSets>
+                        <fileSet>
+                            <directory>${project.build.directory}</directory>
+                            <includes>
+                                <include>${project.artifactId}*.jar</include>
+                            </includes>
+                        </fileSet>
+                    </fileSets>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>release</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
