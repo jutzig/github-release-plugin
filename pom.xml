@@ -42,11 +42,15 @@
 		</repository>
 	</distributionManagement>
 
-	<properties>
-		<version.maven>3.6.0</version.maven>
+	<prerequisites>
+		<maven>3.6.0</maven>
+	</prerequisites>
 
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+	<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.7</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 
 	<build>
