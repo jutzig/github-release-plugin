@@ -288,8 +288,9 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	private static final Pattern REPOSITORY_PATTERN = Pattern.compile(
 			"^(scm:git[:|])?" +								//Maven prefix for git SCM
 			"(https?://github\\.com/|git@github\\.com:)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
-			"([^/]+/[^/]*?)" +								//Repository ID
-			"(\\.git)?$"									//Optional suffix ".git"
+			"([^/]+/[^/\\.]+)" +							//Repository ID
+			"(\\.git)?" +									//Optional suffix ".git"
+			"(/.*)?$"										//Optional child project path
 	, Pattern.CASE_INSENSITIVE);
 
 	public static String computeRepositoryId(String id) {
