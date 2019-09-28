@@ -192,26 +192,28 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 					release.delete();
 
 					getLog().info("Release " + release.getName() + " removed successfully.");
+					release = null;
+				} else {
+					getLog().info(message);
 				}
-
-				getLog().info(message);
 			}
-
-			getLog().info("Creating release "+releaseName);
-			GHReleaseBuilder builder = repository.createRelease(tag);
-			if(description!=null) {
-				builder.body(description);
+			if (release == null) {
+				getLog().info("Creating release "+releaseName);
+				GHReleaseBuilder builder = repository.createRelease(tag);
+				if(description!=null) {
+					builder.body(description);
+				}
+				if (commitish!=null) {
+					builder.commitish(commitish);
+				}
+				if (draft!=null) {
+					builder.draft(draft);
+				}
+	
+				builder.prerelease(prerelease);
+				builder.name(releaseName);
+				release = builder.create();
 			}
-			if (commitish!=null) {
-				builder.commitish(commitish);
-			}
-			if (draft!=null) {
-				builder.draft(draft);
-			}
-
-			builder.prerelease(prerelease);
-			builder.name(releaseName);
-			release = builder.create();
 		} catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException("Failed to create release", e);
