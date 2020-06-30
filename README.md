@@ -33,7 +33,7 @@ To use the plugin you need to configure it in your `pom.xml` like so
 </plugin>
 ```
 
-Unless otherwise specified, the plugin will upload the main artifact of your project and take the github repository url from the `<scm>` section.
+Unless otherwise specified with `<repositoryId>user/repo</repositoryId>` tag, the plugin will upload the main artifact of your project and take the github repository url from the `<scm>` section. If you get a `Not Found` error in the logs, consider to specify the repository manually.
 
 By default, the plugin will look for your github credentials in your maven `settings.xml`. Example
 ```
@@ -49,6 +49,11 @@ By default, the plugin will look for your github credentials in your maven `sett
 These credentials can be overridden by setting `username` and `password` as system properties.
 
 Thanks to a contribution from rowanseymour you can also use your API token by adding it as `<privateKey>` to your server definition in the `settings.xml`.
+
+The plugin is associated to maven goal deploy. If you don't want to deploy packages but only to create a release, use:
+```
+mvn github-release:release
+```
 
 Additional Parameters:
 
