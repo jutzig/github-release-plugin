@@ -48,6 +48,7 @@ import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHReleaseBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.PagedIterable;
 
 /**
@@ -91,6 +92,12 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 */
 	@Parameter(property = "github.draft")
 	private Boolean draft;
+
+	/**
+	 * GitHub REST API root endpoint.
+	 */
+	@Parameter(property = "github.apiEndpoint", defaultValue = "https://api.github.com")
+	private String githubApiEndpoint;
 
 	/**
 	 * The github id of the project. By default initialized from the project scm connection
@@ -311,10 +318,11 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String serverUsername = server.getUsername();
 		String serverPassword = server.getPassword();
 		String serverAccessToken = server.getPrivateKey();
+		GitHubBuilder gitHubBuilder = new GitHubBuilder().withEndpoint(githubApiEndpoint);
 		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
-			return GitHub.connectUsingPassword(serverUsername, serverPassword);
+			return gitHubBuilder.withPassword(serverUsername, serverPassword).build();
 		else if (StringUtils.isNotEmpty(serverAccessToken))
-			return GitHub.connectUsingOAuth(serverAccessToken);
+			return gitHubBuilder.withOAuthToken(serverAccessToken).build();
 		else
 			throw new MojoExecutionException("Configuration for server " + serverId + " has no login credentials");
 	}

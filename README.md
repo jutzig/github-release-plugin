@@ -54,5 +54,6 @@ Additional Parameters:
 
  * `-Dgithub.draft=true` creates the release in draft state
  * `-Dgithub.commitish=release/1.0.0` allows to specify a commitsh
+ * `-Dgithub.apiEndpoint=https://github.myorg.com/` allows to customize the root endpoint of GitHub REST API in case of private GitHub Enterprise installations.
 
 The plugin is available on Maven central
