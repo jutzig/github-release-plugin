@@ -201,7 +201,7 @@
 		<dependency>
 			<groupId>org.kohsuke</groupId>
 			<artifactId>github-api</artifactId>
-			<version>1.95</version>
+			<version>1.317</version>
 		</dependency>
 
 		<dependency>
@@ -221,6 +221,11 @@
 			<artifactId>maven-core</artifactId>
 			<version>3.5.4</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+			<version>3.2.1</version>
 		</dependency>
 
 		<dependency>
