@@ -298,9 +298,9 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			return PUBLIC_GITUHB_API_ENDPOINT;
 		}
 		Matcher matcher = REPOSITORY_PATTERN.matcher(scm.getConnection());
-        if (!matcher.matches()) {
-            return PUBLIC_GITUHB_API_ENDPOINT;
-        }
+		if (!matcher.matches()) {
+			return PUBLIC_GITUHB_API_ENDPOINT;
+		}
 
 		String githubApiEndpoint = matcher.group(2);
 		if (githubApiEndpoint.startsWith("git@")) {
