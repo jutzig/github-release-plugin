@@ -295,10 +295,11 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	public GitHub createGithub(String serverId) throws MojoExecutionException, IOException {
 		String usernameProperty = System.getProperty("username");
 		String passwordProperty = System.getProperty("password");
+		GitHubBuilder gitHubBuilder = new GitHubBuilder().withEndpoint(githubApiEndpoint);
 		if(usernameProperty!=null && passwordProperty!=null)
 		{
-			getLog().debug("Using server credentials from system properties 'username' and 'password'");	
-			return GitHub.connectUsingPassword(usernameProperty, passwordProperty);
+			getLog().debug("Using server credentials from system properties 'username' and 'password'");
+			return gitHubBuilder.withPassword(usernameProperty, passwordProperty).build();
 		}
 
 		Server server = getServer(settings, serverId);
@@ -318,7 +319,6 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String serverUsername = server.getUsername();
 		String serverPassword = server.getPassword();
 		String serverAccessToken = server.getPrivateKey();
-		GitHubBuilder gitHubBuilder = new GitHubBuilder().withEndpoint(githubApiEndpoint);
 		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
 			return gitHubBuilder.withPassword(serverUsername, serverPassword).build();
 		else if (StringUtils.isNotEmpty(serverAccessToken))
