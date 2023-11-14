@@ -301,14 +301,14 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		if (!matcher.matches()) {
 			return PUBLIC_GITUHB_API_ENDPOINT;
 		}
-
 		String githubApiEndpoint = matcher.group(2);
+		if (githubApiEndpoint.contains("github.com")) {
+			return PUBLIC_GITUHB_API_ENDPOINT;
+		}
+
 		if (githubApiEndpoint.startsWith("git@")) {
 			// According to the regex pattern above, the matched group would be in a form of git@hostname:
 			githubApiEndpoint = githubApiEndpoint.substring(4, githubApiEndpoint.length() - 1);
-		}
-		if (githubApiEndpoint.contains("github.com")) {
-			return PUBLIC_GITUHB_API_ENDPOINT;
 		}
 
 		githubApiEndpoint = StringUtils.removeEnd(githubApiEndpoint, "/");
