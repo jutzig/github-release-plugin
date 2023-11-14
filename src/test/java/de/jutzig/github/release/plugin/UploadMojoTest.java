@@ -83,53 +83,53 @@ class UploadMojoTest {
 	private static Stream<Arguments> scmFixture() {
 		return Stream.of(
 			// Public GitHub
-			Arguments.of(mockScmWithConnectionString("scm:git:https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("scm:git|https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git:https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("scm:git|http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git:http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("scm:git|git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git:git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("scm:git|https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git:https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("scm:git|http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
-			Arguments.of(mockScmWithConnectionString("http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git:http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
 
 			// GitHub Enterprise
-			Arguments.of(mockScmWithConnectionString("scm:git:https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("scm:git|https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git:https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("scm:git|http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git:http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("scm:git|git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git:git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("scm:git|https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git:https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
 
-			Arguments.of(mockScmWithConnectionString("scm:git:http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("scm:git|http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
-			Arguments.of(mockScmWithConnectionString("http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git:http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
 
 			// Fallback to public
 			Arguments.of(null, "https://api.github.com")
 		);
 	}
 
-	private static Scm mockScmWithConnectionString(String connection) {
+	private static Scm scmWithConnectionString(String connection) {
 		Scm scm = new Scm();
 		scm.setConnection(connection);
 		return scm;
