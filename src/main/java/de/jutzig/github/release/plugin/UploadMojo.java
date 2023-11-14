@@ -297,29 +297,27 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		if (scm == null || StringUtils.isEmpty(scm.getConnection())) {
 			return PUBLIC_GITUHB_API_ENDPOINT;
 		}
-
 		Matcher matcher = REPOSITORY_PATTERN.matcher(scm.getConnection());
-		if (matcher.matches()) {
-			String githubApiEndpoint = matcher.group(2);
-			if (githubApiEndpoint.startsWith("git@")) {
-				// According to the regex pattern above, the matched group would be in a form of git@hostname:
-				githubApiEndpoint = githubApiEndpoint.substring(4, githubApiEndpoint.length() - 1);
-			}
-			// Public
-			if (githubApiEndpoint.contains("github.com")) {
-				return PUBLIC_GITUHB_API_ENDPOINT;
-			}
+        if (!matcher.matches()) {
+            return PUBLIC_GITUHB_API_ENDPOINT;
+        }
 
-			githubApiEndpoint = StringUtils.removeEnd(githubApiEndpoint, "/");
-			if (!githubApiEndpoint.startsWith("http")) {
-				githubApiEndpoint = "https://" + githubApiEndpoint;
-			}
-			// See https://docs.github.com/en/enterprise-server@3.10/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#schema
-			return githubApiEndpoint + "/api/v3";
-		} else {
+		String githubApiEndpoint = matcher.group(2);
+		if (githubApiEndpoint.startsWith("git@")) {
+			// According to the regex pattern above, the matched group would be in a form of git@hostname:
+			githubApiEndpoint = githubApiEndpoint.substring(4, githubApiEndpoint.length() - 1);
+		}
+		if (githubApiEndpoint.contains("github.com")) {
 			return PUBLIC_GITUHB_API_ENDPOINT;
 		}
-	}
+
+		githubApiEndpoint = StringUtils.removeEnd(githubApiEndpoint, "/");
+		if (!githubApiEndpoint.startsWith("http")) {
+			githubApiEndpoint = "https://" + githubApiEndpoint;
+		}
+		// See https://docs.github.com/en/enterprise-server@3.10/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#schema
+		return githubApiEndpoint + "/api/v3";
+    }
 
 	public GitHub createGithub(String serverId) throws MojoExecutionException, IOException {
 		String usernameProperty = System.getProperty("username");
