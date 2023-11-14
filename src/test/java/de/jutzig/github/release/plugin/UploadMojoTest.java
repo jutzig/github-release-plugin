@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UploadMojoTest {
 	@ParameterizedTest(name = "{0} should resolve to {1} repository id")
 	@CsvSource({
+		// Public
 		"scm:git:https://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 		"scm:git|https://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 		"https://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
@@ -30,7 +31,28 @@ class UploadMojoTest {
 
 		"scm:git:http://github.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
 		"scm:git|http://github.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
-		"http://github.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin"
+		"http://github.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		
+		// Enterprise
+		"scm:git:https://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|https://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"https://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+
+		"scm:git:http://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|http://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"http://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+
+		"scm:git:git@github.acme.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|git@github.acme.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"git@github.acme.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+
+		"scm:git:https://github.acme.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+		"scm:git|https://github.acme.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+		"https://github.acme.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+
+		"scm:git:http://github.acme.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		"scm:git|http://github.acme.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		"http://github.acme.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin"
 	})
 	void testComputeRepositoryId(String scmString, String expectedRepositoryId) {
 		assertEquals(expectedRepositoryId, UploadMojo.computeRepositoryId(scmString));
