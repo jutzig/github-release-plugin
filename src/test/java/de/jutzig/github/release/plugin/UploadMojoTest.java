@@ -58,7 +58,7 @@ class UploadMojoTest {
 		assertEquals(expectedRepositoryId, UploadMojo.computeRepositoryId(scmString));
 	}
 
-	@ParameterizedTest(name = "{0} should resolve to {1} endpoiont")
+	@ParameterizedTest(name = "{0} should resolve to {1} endpoint")
 	@MethodSource("scmFixture")
 	void testGithubEndpoint(Scm scm, String expectedEndpoint) {
 		assertEquals(expectedEndpoint, UploadMojo.computeGithubApiEndpoint(scm));
