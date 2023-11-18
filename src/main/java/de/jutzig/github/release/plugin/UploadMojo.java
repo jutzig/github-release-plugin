@@ -25,11 +25,14 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.FileSet;
+import org.apache.maven.model.Scm;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
@@ -48,6 +51,7 @@ import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHReleaseBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.PagedIterable;
 
 /**
@@ -56,6 +60,7 @@ import org.kohsuke.github.PagedIterable;
 @Mojo(name = "release", defaultPhase = LifecyclePhase.DEPLOY)
 public class UploadMojo extends AbstractMojo implements Contextualizable{
 
+	private static final String PUBLIC_GITUHB_API_ENDPOINT = "https://api.github.com";
 	/**
 	 * Server id for github access.
 	 */
@@ -148,6 +153,9 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 */
 	@Parameter(defaultValue = "false")
 	private Boolean failOnExistingRelease;
+
+	@Component
+	private MavenProject project;
 
 	public void execute() throws MojoExecutionException {
 		if(releaseName==null)
@@ -270,7 +278,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	 */
 	private static final Pattern REPOSITORY_PATTERN = Pattern.compile(
 			"^(scm:git[:|])?" +								//Maven prefix for git SCM
-			"(https?://github\\.com/|git@github\\.com:)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
+			"(https?://[\\w\\d.-]+/|git@[\\w\\d.-]+:)" +	//GitHub prefix for HTTP/HTTPS/SSH/Subversion scheme
 			"([^/]+/[^/\\.]+)" +							//Repository ID
 			"(\\.git)?" +									//Optional suffix ".git"
 			"(/.*)?$"										//Optional child project path
@@ -285,13 +293,41 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		}
 	}
 
+	static String computeGithubApiEndpoint(Scm scm) {
+		if (scm == null || StringUtils.isEmpty(scm.getConnection())) {
+			return PUBLIC_GITUHB_API_ENDPOINT;
+		}
+		Matcher matcher = REPOSITORY_PATTERN.matcher(scm.getConnection());
+		if (!matcher.matches()) {
+			return PUBLIC_GITUHB_API_ENDPOINT;
+		}
+		String githubApiEndpoint = matcher.group(2);
+		if (githubApiEndpoint.contains("github.com")) {
+			return PUBLIC_GITUHB_API_ENDPOINT;
+		}
+
+		if (githubApiEndpoint.startsWith("git@")) {
+			// According to the regex pattern above, the matched group would be in a form of git@hostname:
+			githubApiEndpoint = githubApiEndpoint.substring(4, githubApiEndpoint.length() - 1);
+		}
+
+		githubApiEndpoint = StringUtils.removeEnd(githubApiEndpoint, "/");
+		if (!githubApiEndpoint.startsWith("http")) {
+			githubApiEndpoint = "https://" + githubApiEndpoint;
+		}
+		// See https://docs.github.com/en/enterprise-server@3.10/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#schema
+		return githubApiEndpoint + "/api/v3";
+    }
+
 	public GitHub createGithub(String serverId) throws MojoExecutionException, IOException {
 		String usernameProperty = System.getProperty("username");
 		String passwordProperty = System.getProperty("password");
+		String githubApiEndpoint = computeGithubApiEndpoint(project.getScm());
+		GitHubBuilder gitHubBuilder = new GitHubBuilder().withEndpoint(githubApiEndpoint);
 		if(usernameProperty!=null && passwordProperty!=null)
 		{
-			getLog().debug("Using server credentials from system properties 'username' and 'password'");	
-			return GitHub.connectUsingPassword(usernameProperty, passwordProperty);
+			getLog().debug("Using server credentials from system properties 'username' and 'password'");
+			return gitHubBuilder.withPassword(usernameProperty, passwordProperty).build();
 		}
 
 		Server server = getServer(settings, serverId);
@@ -312,9 +348,9 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 		String serverPassword = server.getPassword();
 		String serverAccessToken = server.getPrivateKey();
 		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
-			return GitHub.connectUsingPassword(serverUsername, serverPassword);
+			return gitHubBuilder.withPassword(serverUsername, serverPassword).build();
 		else if (StringUtils.isNotEmpty(serverAccessToken))
-			return GitHub.connectUsingOAuth(serverAccessToken);
+			return gitHubBuilder.withOAuthToken(serverAccessToken).build();
 		else
 			throw new MojoExecutionException("Configuration for server " + serverId + " has no login credentials");
 	}

@@ -1,54 +1,71 @@
 package de.jutzig.github.release.plugin;
 
-import org.junit.Before;
-import org.junit.Test;
+import java.util.stream.Stream;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.maven.model.Scm;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class UploadMojoTest {
+class UploadMojoTest {
+	@ParameterizedTest(name = "{0} should resolve to {1} repository id")
+	@CsvSource({
+		// Public
+		"scm:git:https://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|https://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"https://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 
-	private Map<String, String> computeRepositoryIdData;
+		"scm:git:http://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|http://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"http://github.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 
-	@Before
-	public void setUp() throws Exception {
-		computeRepositoryIdData = new HashMap<String, String>();
+		"scm:git:git@github.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|git@github.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"git@github.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 
-		computeRepositoryIdData.put("scm:git:https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("scm:git|https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("https://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		"scm:git:https://github.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+		"scm:git|https://github.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+		"https://github.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
 
-		computeRepositoryIdData.put("scm:git:http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("scm:git|http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("http://github.com/jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		"scm:git:http://github.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		"scm:git|http://github.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		"http://github.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		
+		// Enterprise
+		"scm:git:https://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|https://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"https://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 
-		computeRepositoryIdData.put("scm:git:git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("scm:git|git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("git@github.com:jutzig/github-release-plugin.git", "jutzig/github-release-plugin");
+		"scm:git:http://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|http://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"http://github.acme.com/jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 
-		computeRepositoryIdData.put("scm:git:https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("scm:git|https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("https://github.com/jutzig/github-release-plugin", "jutzig/github-release-plugin");
+		"scm:git:git@github.acme.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"scm:git|git@github.acme.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
+		"git@github.acme.com:jutzig/github-release-plugin.git, jutzig/github-release-plugin",
 
-		computeRepositoryIdData.put("scm:git:http://github.com/jutzig/github-release-plugin.git/child", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("scm:git|http://github.com/jutzig/github-release-plugin.git/child", "jutzig/github-release-plugin");
-		computeRepositoryIdData.put("http://github.com/jutzig/github-release-plugin.git/child", "jutzig/github-release-plugin");
+		"scm:git:https://github.acme.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+		"scm:git|https://github.acme.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+		"https://github.acme.com/jutzig/github-release-plugin, jutzig/github-release-plugin",
+
+		"scm:git:http://github.acme.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		"scm:git|http://github.acme.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin",
+		"http://github.acme.com/jutzig/github-release-plugin.git/child, jutzig/github-release-plugin"
+	})
+	void testComputeRepositoryId(String scmString, String expectedRepositoryId) {
+		assertEquals(expectedRepositoryId, UploadMojo.computeRepositoryId(scmString));
+	}
+
+	@ParameterizedTest(name = "{0} should resolve to {1} endpoint")
+	@MethodSource("scmFixture")
+	void testGithubEndpoint(Scm scm, String expectedEndpoint) {
+		assertEquals(expectedEndpoint, UploadMojo.computeGithubApiEndpoint(scm));
 	}
 
 	@Test
-	public void testComputeRepositoryId() throws Exception {
-		for (String source : computeRepositoryIdData.keySet()) {
-			String expected = computeRepositoryIdData.get(source);
-			assertEquals(source, expected, UploadMojo.computeRepositoryId(source));
-		}
-	}
-
-	@Test
-	public void testGuessPreRelease() {
+	void testGuessPreRelease() {
 		assertTrue(UploadMojo.guessPreRelease("1.0-SNAPSHOT"));
 		assertTrue(UploadMojo.guessPreRelease("1.0-alpha"));
 		assertTrue(UploadMojo.guessPreRelease("1.0-alpha-1"));
@@ -61,5 +78,60 @@ public class UploadMojoTest {
 
 		assertFalse(UploadMojo.guessPreRelease("1"));
 		assertFalse(UploadMojo.guessPreRelease("1.0"));
+	}
+
+	private static Stream<Arguments> scmFixture() {
+		return Stream.of(
+			// Public GitHub
+			Arguments.of(scmWithConnectionString("scm:git:https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("https://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+
+			Arguments.of(scmWithConnectionString("scm:git:http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("http://github.com/jutzig/github-release-plugin.git"), "https://api.github.com"),
+
+			Arguments.of(scmWithConnectionString("scm:git:git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("git@github.com:jutzig/github-release-plugin.git"), "https://api.github.com"),
+
+			Arguments.of(scmWithConnectionString("scm:git:https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("https://github.com/jutzig/github-release-plugin"), "https://api.github.com"),
+
+			Arguments.of(scmWithConnectionString("scm:git:http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
+			Arguments.of(scmWithConnectionString("http://github.com/jutzig/github-release-plugin.git/child"), "https://api.github.com"),
+
+			// GitHub Enterprise
+			Arguments.of(scmWithConnectionString("scm:git:https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("https://github.acme.com/jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+
+			Arguments.of(scmWithConnectionString("scm:git:http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("http://github.acme.com/jutzig/github-release-plugin.git"), "http://github.acme.com/api/v3"),
+
+			Arguments.of(scmWithConnectionString("scm:git:git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("git@github.acme.com:jutzig/github-release-plugin.git"), "https://github.acme.com/api/v3"),
+
+			Arguments.of(scmWithConnectionString("scm:git:https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("https://github.acme.com/jutzig/github-release-plugin"), "https://github.acme.com/api/v3"),
+
+			Arguments.of(scmWithConnectionString("scm:git:http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("scm:git|http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
+			Arguments.of(scmWithConnectionString("http://github.acme.com/jutzig/github-release-plugin.git/child"), "http://github.acme.com/api/v3"),
+
+			// Fallback to public
+			Arguments.of(null, "https://api.github.com")
+		);
+	}
+
+	private static Scm scmWithConnectionString(String connection) {
+		Scm scm = new Scm();
+		scm.setConnection(connection);
+		return scm;
 	}
 }
