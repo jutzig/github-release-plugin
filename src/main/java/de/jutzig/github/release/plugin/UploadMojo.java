@@ -344,9 +344,9 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			throw new MojoExecutionException("Unable to lookup SettingsDecrypter: " + cle.getMessage(), cle);
 		}
 
-		String serverUsername = server.getUsername();
-		String serverPassword = server.getPassword();
-		String serverAccessToken = server.getPrivateKey();
+		String serverUsername = System.getProperty("github.username", server.getUsername());
+		String serverPassword = System.getProperty("github.password", server.getPassword());
+		String serverAccessToken = System.getProperty("github.apitoken", server.getPrivateKey());
 		if (StringUtils.isNotEmpty(serverUsername) && StringUtils.isNotEmpty(serverPassword))
 			return gitHubBuilder.withPassword(serverUsername, serverPassword).build();
 		else if (StringUtils.isNotEmpty(serverAccessToken))

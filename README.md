@@ -11,7 +11,7 @@ To use the plugin you need to configure it in your `pom.xml` like so
 <plugin>
     <groupId>de.jutzig</groupId>
     <artifactId>github-release-plugin</artifactId>
-    <version>1.1.1</version>
+    <version>1.5.0</version>
     <configuration>
         <description>Description of your release</description>
         <releaseName>1.0 Final</releaseName>
@@ -35,11 +35,12 @@ To use the plugin you need to configure it in your `pom.xml` like so
 
 Unless otherwise specified, the plugin will upload the main artifact of your project and take the github repository url from the `<scm>` section.
 
-By default, the plugin will look for your github credentials in your maven `settings.xml`. Example
+By default, the plugin will look for your github credentials in your maven `settings.xml`. Credentials can be privated as an API token, or username and password. Example
 ```
 <servers>
     <server>
         <id>github</id>
+        <privateKey>API_TOKEN</privateKey>
         <username>GITHUB_USERNAME</username>
         <password>GITHUB_PASSWORD</password>
     </server>
@@ -48,12 +49,13 @@ By default, the plugin will look for your github credentials in your maven `sett
 
 These credentials can be overridden by setting `username` and `password` as system properties.
 
-Thanks to a contribution from rowanseymour you can also use your API token by adding it as `<privateKey>` to your server definition in the `settings.xml`.
-
 Additional Parameters:
 
  * `-Dgithub.draft=true` creates the release in draft state
  * `-Dgithub.commitish=release/1.0.0` allows to specify a commitsh
+ * `-Dgithub.apitoken=API_TOKEN` allows to set github api token instead of providing it in settings.xml
+ * `-Dgithub.username=GITHUB_USERNAME` allows to set github username instead of providing it in settings.xml
+ * `-Dgithub.password=GITHUB_PASSWORD` allows to set github password instead of providing it in settings.xml
 
 The plugin is available on Maven central
 

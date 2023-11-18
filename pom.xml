@@ -55,6 +55,11 @@
 
 	<build>
 		<plugins>
+		    <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.6.4</version>
+            </plugin>		
 			<plugin>
           		<groupId>org.apache.maven.plugins</groupId>
           		<artifactId>maven-javadoc-plugin</artifactId>
@@ -83,8 +88,9 @@
 							<goal>install</goal>
 							<goal>run</goal>
 						</goals>
-
-						<phase>package</phase>
+						<!-- disabled -->
+						<phase>none</phase>
+						<!-- <phase>package</phase> -->
 					</execution>
 				</executions>
 				<dependencies>
