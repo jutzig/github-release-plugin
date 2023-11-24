@@ -82,7 +82,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 	/**
 	 * The release description
 	 */
-	@Parameter(property = "project.description")
+	@Parameter
 	private String description;
 
 	/**
@@ -189,6 +189,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable{
 			if (release == null) {
 				getLog().info("Creating release "+releaseName);
 				GHReleaseBuilder builder = repository.createRelease(tag);
+				builder.generateReleaseNotes(true);
 				if(description!=null) {
 					builder.body(description);
 				}
